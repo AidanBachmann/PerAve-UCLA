@@ -19,7 +19,7 @@ Z0 = 376.73;                                                     % Impedance of 
 clear power radfield thetap gammap bunch
 param.sigma_t = 0.9e-12;
 param.use3Dcorrection  = 1;
-param.beamdistribution = 2;       % Using GENESIS flag: 2-uniform 1-gaussian
+param.beamdistribution = 1;       % Using GENESIS flag: 2-uniform 1-gaussian
 param.laserdistribution = 1;         % Using GENESIS flag: 2-uniform 1-gaussian
 recirculate = 0;
 t1 = tic;
@@ -81,8 +81,11 @@ tapering_strength = 2;   % 0 max of slices at time 0
     hold on
     plot(angle(filter3),'k')
     hold off
+
+bucket_parameters(param.psir)
+
  %% Oscillator loop
-for npasses = 1:100
+for npasses = 1:1 % 1:100
     clear power radfield thetap gammap bunch
     t0 = tic;
     perave_core_v6;

@@ -3,12 +3,12 @@
 %% from Duris et al. TESSO paper 
 
 %% Undulator parameters
-param.lambdau = 2.7e-2;                                 % undulator period (m)
-param.K = 4.2; %e0*Bfield*/me/c/ku;               % RMS undulator parameter
+param.lambdau = 3.14e-2;                                 % undulator period (m)
+param.K = 1.934; %e0*Bfield*/me/c/ku;               % RMS undulator parameter
 param.ku = 2.*pi./param.lambdau;                   % undulator wavenumber
-lwig=4.0;                                                             % Undulator length (m)    
+lwig=9.42;                                                             % Undulator length (m), paper defines number of undulator periods and lambdau, so lwig is computed from these vals    
 % Tapering options
-param.tapering = 1;                                         % tapering (-1 acceleration ; 0 no tapering ; 1 decelation)    
+param.tapering = 0;                                         % tapering (-1 acceleration ; 0 no tapering ; 1 decelation)    
 param.z0 = 0;
 param.psir = pi/6;
 
@@ -25,9 +25,9 @@ param.Nsnap = round(lwig/param.lambdau/param.delz);                % number of s
 param.zsep = 5;                                                              
 Nslip=round(param.Nsnap/param.zsep);
 param.shotnoise = 1;
-param.lambda0 = 1e-6;                                    % seed wavelength (m)
+param.lambda0 = 13.5e-9;                                    % seed wavelength (m)
 param.k = 2*pi/param.lambda0;                                     % wavenumber in free space
-param.nslices =4*Nslip+4*round(param.sigma_t/param.zsep/param.lambda0*c);
+param.nslices = 4*Nslip+4*round(param.sigma_t/param.zsep/param.lambda0*c);
 
 if(~param.itdp)
     param.nslices = 1;
@@ -48,9 +48,9 @@ param.bunch = 0.7;                                                   % Initial b
 param.bunchphase = -param.psir-pi/2;                     % Initial bunching phase
 param.buncherAmp = 5;
 
-betax=2;
-emitx=2e-6;
-charge = 1000e-12;
+betax=4.7544975; % 2??
+emitx=1e-6; % 2e-6??
+charge = 2255.965e-12; % 1000??
 %param.sigma_t = 40e-15;
 if (param.beamdistribution == 1)
     param.I = charge/sqrt(2*pi)/param.sigma_t              % beam current 
@@ -63,7 +63,7 @@ param.A_e = 2*pi*param.sigmax^2;                          % beam cross section
 Simulation_temporal_window=param.nslices*param.zsep*param.lambda0/c;
 
 %% radiation parameters
-P0 = 50e9; param.P0=P0;                                               % Peak input power (W) 
+P0 = 30e9; param.P0=P0;                                               % Peak input power (W) 
 A_mode = param.A_e;                                                     % 1D code. area is same for e_beam and radiation
 param.waist = sqrt(A_mode*2/pi);
 zr = pi*param.waist^2/param.lambda0;                          % Rayleigh length of seed (m)
