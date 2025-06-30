@@ -48,9 +48,9 @@ param.bunch = 0.7;                                                   % Initial b
 param.bunchphase = -param.psir-pi/2;                     % Initial bunching phase
 param.buncherAmp = 5;
 
-betax=4.7544975; % 2??
-emitx=1e-6; % 2e-6??
-charge = 2255.965e-12; % 1000??
+betax=5.1; % Average beta function, 4.7544975 (something weird going on here)
+emitx=1e-6; % normalized emittance in m*rad
+charge = 2255.965e-12; % Computed from peak current and sigma_t
 %param.sigma_t = 40e-15;
 if (param.beamdistribution == 1)
     param.I = charge/sqrt(2*pi)/param.sigma_t              % beam current 
