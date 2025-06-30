@@ -82,8 +82,6 @@ tapering_strength = 2;   % 0 max of slices at time 0
     plot(angle(filter3),'k')
     hold off
 
-bucket_parameters(param.psir)
-
  %% Oscillator loop
 for npasses = 1:1 % 1:100
     clear power radfield thetap gammap bunch
