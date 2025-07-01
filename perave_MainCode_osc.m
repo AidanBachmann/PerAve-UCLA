@@ -72,6 +72,7 @@ tapering_strength = 2;   % 0 max of slices at time 0
     filterdelay = round(param.nslices/2/pi/sigma_omega);
     figure(200)
     plot(filter)
+    input('WAIT')
     hold on
     plot(abs(filter2))
     plot(abs(filter3),'k')

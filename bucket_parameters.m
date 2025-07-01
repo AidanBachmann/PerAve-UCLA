@@ -1,4 +1,4 @@
-function [ psi1, psi2, bucket_height, capture_fraction, bucket_area, bunching] = bucket_parameters(psir)
+ function [ psi1, psi2, bucket_height, capture_fraction, bucket_area, bunching] = bucket_parameters(psir)
 % Calculate various bucket parameters as a function of psir
 psi1 = pi - psir;
 pond = @(psi,psir) cos(psi1)+psi1*sin(psir)-(cos(psi)+psi*sin(psir));

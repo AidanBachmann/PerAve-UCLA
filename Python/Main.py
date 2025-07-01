@@ -24,3 +24,18 @@ rho1D = (1/params.gamma0)*pow( (1/8)*(params.I/params.IA)*(pow(params.K,2)/(pow(
 Lgain = params.lambdau/(4*np.sqrt(3)*np.pi*rho1D)
 Lsat =   params.lambdau/rho1D
 Psat = 1.6*rho1D*params.Ee*params.I
+if params.tapering != int(0):
+    bucket_params = funcs.bucket_parameters()
+    # *** Insert code for other parameters here ***
+
+# *** 3D correction to Lgain goes here ***
+
+## Run the main integration routine
+
+cavitydetuning = -16 # In units of zsep
+transmission = 0.66 # Power transmission through one cavity pass, losses = 1 - transmission                                
+sigma_omega = 0.003*params.nslices*params.zsep # Filter fractional bandwidth
+firstpass = int(1)
+tapering_strength = 2   # 0 --> max of slices at time 0, 1 --> max of slices, 2 --> avg of slices
+
+funcs.filter(sigma_omega)
