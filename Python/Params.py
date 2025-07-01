@@ -18,10 +18,10 @@ Z0 = 376.73 # Impedance of free space
 # ---------- Parameters ----------
 
 sigma_t = 0.9e-12 # Pulse width
-use3Dcorrection  = 1 # Use 3D correction boolean
-beamdistribution = 1 # Set beam distribution, 2-uniform 1-gaussian
-laserdistribution = 1 # Set beam distribution, 2-uniform 1-gaussian
-recirculate = 0 # ***** Not sure
+use3Dcorrection  = int(1) # Use 3D correction boolean
+beamdistribution = int(1) # Set beam distribution, 2-uniform 1-gaussian
+laserdistribution = int(1) # Set beam distribution, 2-uniform 1-gaussian
+recirculate = int(0) # ***** Not sure
 
 ## Undulator parameters
 lambdau = 3.14e-2 # Undulator period (m)
@@ -29,16 +29,16 @@ K = 1.934 # RMS undulator parameter, e0*Bfield*/me/c/ku
 ku = (2*np.pi)/lambdau # Undulator wavenumber
 lwig = 9.42 # Undulator length (m), paper defines number of undulator periods and lambdau, so lwig is computed from these vals
 # Tapering options
-tapering = 0 # Set tapering (-1 acceleration, 0 no tapering, 1 decelation)    
+tapering = int(0) # Set tapering (-1 acceleration, 0 no tapering, 1 decelation)    
 z0 = 0
 psir = np.pi/6 # Phase
 
 ## Simulation control options
-phasespacemovie = 0 # Create phase space movie
-itdp = 0 # 1 for time-dependent simulation, 0 for time independent
-prebunching = 1 # Prebunching boolean, set to 1 to start from a pre-bunched beam
+phasespacemovie = int(0) # Create phase space movie
+itdp = int(0) # 1 for time-dependent simulation, 0 for time independent
+prebunching = int(1) # Prebunching boolean, set to 1 to start from a pre-bunched beam
 changeresphase = 0 # ***** Not sure
-saveoutput = 0 # Save output bool
+saveoutput = int(0) # Save output bool
 # Set simulation length and # of snapshots
 delz = 1 # ***** Not sure
 und_periods = round(lwig/lambdau) # Number of undulator periods to simulate
@@ -51,14 +51,16 @@ k = (2*np.pi)/lambda0 # Wavenumber in free space
 nslices = 4*Nslip+4*round(sigma_t/zsep/lambda0*c) # ***** Not sure
 
 if itdp == 0:
+    print('\nRunning time independent simulation.\n')
     nslices = 1
 elif itdp == 1:
+    print('\nRunning time-dependent simulation.\n')
     Nsnap = math.floor(und_periods/delz) # Note that the result must be an integer
 stepsize = lambdau*delz
 
 ## Electron beam parameters
 gamma0 = np.sqrt((k/(2*ku))*(1+pow(K,2))) # Lorentz factor
-Np = 512 # Number of macroparticles (500-1000 well) 
+Np = int(512) # Number of macroparticles (500-1000 well) 
 Ee = (gamma0*me*pow(c,2))/e0 # Total e-beam energy, gamma*m*c^2 (eV)
 energyspread = 1*20e-15/sigma_t # Absolute energy spread (MeV)
 deltagammarel = energyspread/(gamma0*0.511) # Relative energy spread, dgamma/gamma

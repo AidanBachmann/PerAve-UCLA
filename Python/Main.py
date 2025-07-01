@@ -17,3 +17,10 @@ res_phase = np.zeros([params.Nsnap]) # Resonant phase?
 Kz = np.zeros([params.Nsnap]) # Number of buckets for spatial discretization, I think
 
 funcs.computeUndulatorField(res_phase,Kz) # Compute undulator field
+
+## FEL Parameters
+
+rho1D = (1/params.gamma0)*pow( (1/8)*(params.I/params.IA)*(pow(params.K,2)/(pow(params.sigmax*params.ku,2))),(1/3))
+Lgain = params.lambdau/(4*np.sqrt(3)*np.pi*rho1D)
+Lsat =   params.lambdau/rho1D
+Psat = 1.6*rho1D*params.Ee*params.I
