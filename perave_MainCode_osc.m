@@ -26,7 +26,7 @@ t1 = tic;
 Perave_User_Input_osc;
 
 %% Compute the undulator field
-compute_undulator_field_v5h
+compute_undulator_field_v5h;
 
 %% Calculate 1-D FEL parameters
 rho1D = 1/param.gamma0*(1/8*param.I/IA*param.K.^2/param.sigmax^2/param.ku^2)^(1/3);
@@ -135,5 +135,5 @@ figure(103)
 plot(Eff)
 
 figure(300)
-contourf([1:size(rad_vs_beam,1)]*param.zsep*param.lambda0/c,[1:100],rad_vs_beam')
+contourf([1:size(rad_vs_beam,1)]*param.zsep*param.lambda0/c,[1:1],rad_vs_beam')
 

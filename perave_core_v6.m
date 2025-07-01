@@ -1,9 +1,9 @@
 % This version is for a KMR style 1-D TESSA where you choose the undulator
 % K iteratively by specifying the resonant phase
 %% initialize phase space (Quiet - start problem )
-t_init= tic;
-Np = param.Np;
-nbins = 32;
+t_init= tic; % Initial system time
+Np = param.Np; % Grab number of particles
+nbins = 32; % Binning for particles?
 mpart = Np/nbins;
 n_electron = param.I*param.lambda0*param.zsep/e0/c;
 p1 = zeros(Np,1); 

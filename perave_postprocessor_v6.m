@@ -66,6 +66,7 @@ xlim([omega(1)+1,omega(end)+1]*hbar*2*pi*c/param.lambda0)
 end
 
 %% Bunching factor and energy loss 
+%{
 figure(2)
 set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
 
@@ -84,6 +85,7 @@ end
 xlabel('z')
 ylabel('trapped fraction')
 plot([1:1:param.Nsnap-1]*param.stepsize,trap)
+%}
 
 for ij=1:param.Nsnap
 meanenergy(ij)=sum(mean(gammap(ij,:,:),3).*profile_b)/sum(profile_b);
@@ -95,6 +97,7 @@ plot([1:1:param.Nsnap]*param.stepsize,meanenergy)
 xlabel('z')
 ylabel('\gamma')
 xlim([0,param.Nsnap*param.stepsize])
+
 
 if param.itdp
 end
