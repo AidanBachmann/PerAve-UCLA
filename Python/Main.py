@@ -6,3 +6,4 @@ import Params as params # Parameters for code
 from numba import jit
 import time
 
+print(params.c)
