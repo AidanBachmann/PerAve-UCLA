@@ -13,6 +13,9 @@ import time
 # Note: res_phase and Kz are numpy arrays (which are objects) so, by default, Python passes by reference. As a result,
 # we don't need any return statements on functions such as computeUndulatorField.
 
+## Flags
+plotFilter = True # Set to true to plot filter function
+
 res_phase = np.zeros([params.Nsnap]) # Resonant phase?
 Kz = np.zeros([params.Nsnap]) # Number of buckets for spatial discretization, I think
 
@@ -38,4 +41,4 @@ sigma_omega = 0.003*params.nslices*params.zsep # Filter fractional bandwidth
 firstpass = int(1)
 tapering_strength = 2   # 0 --> max of slices at time 0, 1 --> max of slices, 2 --> avg of slices
 
-filter3 = funcs.filter(sigma_omega) # Compute filter
+filter3 = funcs.filter(sigma_omega,plotFilter) # Compute filter

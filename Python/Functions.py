@@ -3,8 +3,9 @@
 # ---------- Imports ----------
 
 import numpy as np
-import Params as params
 import math
+import matplotlib.pyplot as plt
+import Params as params
 
 # ---------- Function Definition ----------
 
@@ -19,7 +20,7 @@ def bucket_parameters(): # Compute bucket parameters from params.psir. Definitio
     
     return bucket_parameters
 
-def filter(sigma_omega): # Compute filters
+def filter(sigma_omega,plotFilter): # Compute filters
     jfreq = np.linspace(0,params.nslices,params.nslices,dtype='int')
     filter = np.exp(-pow(jfreq-params.nslices*np.ones(params.nslices)/2,2)/(2*pow(sigma_omega,2)))
     filter2 = np.zeros([len(jfreq)],dtype='complex') # Complex transfer function
@@ -36,7 +37,13 @@ def filter(sigma_omega): # Compute filters
         omega_m = params.nslices/2
         Q = 1/sigma_omega
         filter3[jf] = ( 1j*((jf+1)/Q) )/( pow(omega_m,2) - pow((jf+1),2) + 1j*((jf+1)/Q) )
-
     filterdelay = round(params.nslices/(2*np.pi*sigma_omega))
-    print(f'Filter = {filter}\nFilter2 = {filter2}\nFilter3 = {filter3}\nFilter Delay = {filterdelay}\n')
+    #print(f'Filter = {filter}\nFilter2 = {filter2}\nFilter3 = {filter3}\nFilter Delay = {filterdelay}\n')
+    if plotFilter:
+        plt.scatter(jfreq,np.real(filter3),label='Re[filter3]')
+        plt.scatter(jfreq,np.imag(filter3),label='Im[filter3]')
+        plt.xlabel('Frequencies')
+        plt.ylabel('Filter')
+        plt.legend()
+        plt.show()
     return filter3
