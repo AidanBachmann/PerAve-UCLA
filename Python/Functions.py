@@ -20,11 +20,23 @@ def bucket_parameters(): # Compute bucket parameters from params.psir. Definitio
     return bucket_parameters
 
 def filter(sigma_omega): # Compute filters
-    jfreq = np.linspace(1,params.nslices,params.nslices,dtype='int')
-    filter = np.exp(-pow(jfreq-params.nslices/2,2)/(2*pow(sigma_omega,2)))
+    jfreq = np.linspace(0,params.nslices,params.nslices,dtype='int')
+    filter = np.exp(-pow(jfreq-params.nslices*np.ones(params.nslices)/2,2)/(2*pow(sigma_omega,2)))
     filter2 = np.zeros([len(jfreq)],dtype='complex') # Complex transfer function
+    filter3 = np.zeros([len(jfreq)],dtype='complex')
 
     for jf in np.linspace(0,params.nslices-1,params.nslices,dtype='int'):
-        y = (jfreq-params.nslices/2)/sigma_omega
+        y = ((jf+1) - params.nslices/2)/sigma_omega
+        if(y >= 1):
+            filter2[jf] = y - np.sqrt(pow(y,2) - 1)
+        elif(y<=-1):
+            filter2[jf] = y + np.sqrt(pow(y,2) - 1)
+        else:
+            filter2[jf] = y + 1j*np.sqrt(1 - pow(y,2))
+        omega_m = params.nslices/2
+        Q = 1/sigma_omega
+        filter3[jf] = ( 1j*((jf+1)/Q) )/( pow(omega_m,2) - pow((jf+1),2) + 1j*((jf+1)/Q) )
 
-    return 0
+    filterdelay = round(params.nslices/(2*np.pi*sigma_omega))
+    print(f'Filter = {filter}\nFilter2 = {filter2}\nFilter3 = {filter3}\nFilter Delay = {filterdelay}\n')
+    return filter3

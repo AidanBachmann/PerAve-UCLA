@@ -70,6 +70,10 @@ tapering_strength = 2;   % 0 max of slices at time 0
         filter3(jfreq) = 1i*jfreq/Q / (omega_m^2-jfreq^2+1i*jfreq/Q);   
     end    
     filterdelay = round(param.nslices/2/pi/sigma_omega);
+    disp('Hold up, buddy')
+    disp(filter)
+    disp(filter3)
+    input('WAIT')
     figure(200)
     plot(filter)
     hold on

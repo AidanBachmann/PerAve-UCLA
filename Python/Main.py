@@ -38,4 +38,4 @@ sigma_omega = 0.003*params.nslices*params.zsep # Filter fractional bandwidth
 firstpass = int(1)
 tapering_strength = 2   # 0 --> max of slices at time 0, 1 --> max of slices, 2 --> avg of slices
 
-funcs.filter(sigma_omega)
+filter3 = funcs.filter(sigma_omega) # Compute filter
