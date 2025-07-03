@@ -14,7 +14,9 @@ import time
 # we don't need any return statements on functions such as computeUndulatorField.
 
 ## Flags
-plotFilter = True # Set to true to plot filter function
+plotFilter = False # Set to true to plot filter function
+
+## Arrays to store tapering of params
 
 res_phase = np.zeros([params.Nsnap]) # Resonant phase?
 Kz = np.zeros([params.Nsnap]) # Number of buckets for spatial discretization, I think
@@ -30,6 +32,7 @@ Psat = 1.6*rho1D*params.Ee*params.I
 if params.tapering != int(0):
     bucket_params = funcs.bucket_parameters()
     # *** Insert code for other parameters here ***
+Lgain3D = funcs.correction3D() # Compute 3D correction to Lgain
 
 # *** 3D correction to Lgain goes here ***
 
