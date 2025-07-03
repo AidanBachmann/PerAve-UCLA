@@ -23,6 +23,10 @@ else
     profile_l(1:param.nslices) = 0;
     profile_l(abs(tslice-param.slippage)<param.sigma_l) = 1;
 end
+
+disp(profile_b)
+disp(profile_l)
+input('WAIT')
     
 %profile_b = heaviside(tslice-tslice(end)/2+param.sigma_t).*(1-heaviside(tslice-tslice(end)/2-param.sigma_t));
 

@@ -66,10 +66,25 @@ def filter(sigma_omega,plotFilter): # Compute filters
 
 def peraveCore(): # Push particle
     Np = params.Np # Grab number of particles
-    nbins = 32; # Binning for particles?
+    nbins = 32 # Binning for particles?
     mpart = Np/nbins 
     n_electron = (params.I*params.lambda0*params.zsep)/(params.e0*params.c) # Number of electrons?
     p1 = np.zeros([Np,1])
+
+    tslice = np.linspace(1,params.nslices,params.nslices,dtype='int')*( (params.lambda0*params.zsep)/params.c ) # Time slices
+
+    if (params.beamdistribution == 1): # Compute beam distribution
+        profile_b = np.exp(-pow(tslice-tslice[-1]*np.ones(params.nslices)/2,2)/pow(2*params.sigma_t,2))
+    else:
+        profile_b = np.zeros([params.nslices])
+        profile_b[abs(tslice-tslice[-1]*np.ones([params.nslices])/2)<params.sigma_t] = 1
+
+    if (params.laserdistribution == 1): # Compute laser distribution
+        profile_l = np.exp(-pow(tslice-params.slippage*np.ones([params.nslices]),2)/(2*pow(params.sigma_l,2)))
+    else:
+        profile_l = np.zeros([params.nslices])
+        profile_l[abs(tslice-params.slippage*np.ones([params.nslices]))<params.sigma_l] = 1
+    
 
 def peravePostprocessing(): # Postprocess data from core
 
