@@ -6,7 +6,7 @@ Np = param.Np; % Grab number of particles
 nbins = 32; % Binning for particles?
 mpart = Np/nbins;
 n_electron = param.I*param.lambda0*param.zsep/e0/c;
-p1 = zeros(Np,1); 
+p1 = zeros(Np,1);
 
 tslice = (1:param.nslices)*param.lambda0*param.zsep/c;
 

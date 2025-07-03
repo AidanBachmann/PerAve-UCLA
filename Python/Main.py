@@ -15,6 +15,7 @@ import time
 
 ## Flags
 plotFilter = False # Set to true to plot filter function
+npasses = int(100) # Number of passes through oscillator
 
 ## Arrays to store tapering of params
 
@@ -32,7 +33,7 @@ Psat = 1.6*rho1D*params.Ee*params.I
 if params.tapering != int(0):
     bucket_params = funcs.bucket_parameters()
     # *** Insert code for other parameters here ***
-Lgain3D = funcs.correction3D() # Compute 3D correction to Lgain
+Lgain3D = funcs.correction3D(Lgain) # Compute 3D correction to Lgain
 
 # *** 3D correction to Lgain goes here ***
 
@@ -45,3 +46,5 @@ firstpass = int(1)
 tapering_strength = 2   # 0 --> max of slices at time 0, 1 --> max of slices, 2 --> avg of slices
 
 filter3 = funcs.filter(sigma_omega,plotFilter) # Compute filter
+
+funcs.oscLoop(npasses) # Oscillator loop

@@ -4,6 +4,8 @@
 
 import numpy as np
 import math
+import time
+from datetime import datetime
 import matplotlib.pyplot as plt
 import Params as params
 
@@ -20,17 +22,17 @@ def bucket_parameters(): # Compute bucket parameters from params.psir. Definitio
     
     return bucket_parameters
 
-def correction3D(): # Compute 3D correction to Lgain
-    eta_diffr = params.Lgain/( (4*np.pi*pow(params.sigmax,2))/params.lambda0 )
-    eta_em = (params.Lgain/params.betax)*((4*np.pi*params.emitx)/(params.lambda0*params.gamma0)) 
-    eta_es = params.Lgain*(4*np.pi/params.lambdau)*params.deltagammarel
+def correction3D(Lgain): # Compute 3D correction to Lgain
+    eta_diffr = Lgain/( (4*np.pi*pow(params.sigmax,2))/params.lambda0 )
+    eta_em = (Lgain/params.betax)*((4*np.pi*params.emitx)/(params.lambda0*params.gamma0)) 
+    eta_es = Lgain*(4*np.pi/params.lambdau)*params.deltagammarel
 
     a = [0.45, 0.57, 0.55, 1.6, 3, 2, 0.5, 2.9, 2.4, 51, 0.95, 3, 5.4, 0.7, 1.9, 1140, 2.2, 2.9, 3.2]
 
-    eta = a[1]*pow(eta_diffr,a[2]) + a[3]*pow(eta_em,a[4]) + a[5]*pow(eta_es,a[6])
-    eta += a[7]*pow(eta_em,a[8])*pow(eta_es,a[9]) + a[10]*pow(eta_diffr,a[11])*pow(eta_es,a[12]) + a[13]*pow(eta_diffr,a[14])*pow(eta_em,a[15])
-    eta += a[16]*pow(eta_diffr,a[17])*pow(eta_em,a[18])*pow(eta_es,a[19])
-    Lgain3D = params.Lgain*(1+eta)
+    eta = a[0]*pow(eta_diffr,a[1]) + a[2]*pow(eta_em,a[3]) + a[4]*pow(eta_es,a[5])
+    eta += a[6]*pow(eta_em,a[7])*pow(eta_es,a[8]) + a[9]*pow(eta_diffr,a[10])*pow(eta_es,a[11]) + a[12]*pow(eta_diffr,a[13])*pow(eta_em,a[14])
+    eta += a[15]*pow(eta_diffr,a[16])*pow(eta_em,a[17])*pow(eta_es,a[18])
+    Lgain3D = Lgain*(1+eta)
 
     return Lgain3D
 
@@ -61,3 +63,22 @@ def filter(sigma_omega,plotFilter): # Compute filters
         plt.legend()
         plt.show()
     return filter3
+
+def peraveCore(): # Push particle
+    Np = params.Np # Grab number of particles
+    nbins = 32; # Binning for particles?
+    mpart = Np/nbins 
+    n_electron = (params.I*params.lambda0*params.zsep)/(params.e0*params.c) # Number of electrons?
+    p1 = np.zeros([Np,1])
+
+def peravePostprocessing(): # Postprocess data from core
+
+    return 0
+
+def oscLoop(npasses): # Oscillator loop
+    print(f'\nStarting oscillator simulation at {datetime.now().strftime("%d/%m/%Y %H:%M:%S")}.\n')
+    simStart = time.time() # Start time
+    for i in np.linspace(0,npasses-1,npasses,dtype='int'):
+        print(f'Loop {i+1} starting at {datetime.now().strftime("%d/%m/%Y %H:%M:%S")}.')
+        peraveCore()
+    simEnd = time.time() # End time
