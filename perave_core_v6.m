@@ -23,10 +23,6 @@ else
     profile_l(1:param.nslices) = 0;
     profile_l(abs(tslice-param.slippage)<param.sigma_l) = 1;
 end
-
-disp(profile_b)
-disp(profile_l)
-input('WAIT')
     
 %profile_b = heaviside(tslice-tslice(end)/2+param.sigma_t).*(1-heaviside(tslice-tslice(end)/2-param.sigma_t));
 
@@ -42,9 +38,14 @@ gammap=zeros(param.Nsnap,param.nslices,Np);
 
 for islice = 1:param.nslices
 X0 = hammersley(2,Np);
+disp('X0c')
+disp(X0)
+input('WAIT')
 gammap(1,islice,:) = gamma0+param.deltagamma*X0(1,:);
 auxtheta1 = hammersley(1,mpart)'*2*pi/nbins-pi;
-
+disp(gammap)
+disp(auxtheta1)
+input('WAIT')
 for jbin = 1:nbins
     for ipart = 1:mpart
         thetap(1,islice,ipart+(jbin-1)*mpart)=auxtheta1(ipart)+2*(jbin-1)*pi/nbins;

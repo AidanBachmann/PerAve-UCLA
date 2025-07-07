@@ -64,36 +64,131 @@ def filter(sigma_omega,plotFilter): # Compute filters
         plt.show()
     return filter3
 
-def peraveCore(): # Push particle
+def primes(num): #  Sieve of Eratosthenes, adapted from: https://www.geeksforgeeks.org/python/python-program-for-sieve-of-eratosthenes/
+    prime = [True for i in range(num+1)]
+    pArr = []
+    # Boolean array
+    p = 2
+    while (p * p <= num):
+        # If prime[p] is not
+        # changed, then it is a prime
+        if (prime[p] == True):
+            # Updating all multiples of p
+            for i in range(p * p, num+1, p):
+                prime[i] = False
+        p += 1
+
+    # Print all prime numbers
+    for p in range(2, num+1):
+        if prime[p]:
+            pArr.append(p)
+    return np.asarray(pArr)
+
+def hammersley(D,N):
+# HAMMERSLEY - Hammersley quasi-random sequence
+# 
+#   S = HAMMERSLEY(D,N) Generates N numbers from a D-dimensional
+#   Hammersley quasirandom sequence using successive primes
+#   as bases except for the last dimension which has the form
+#   [1:N]'/N-1/2/N (where the last term modifies usual Hammersley
+#   sequence to produce sequence in open interval (0,1)). The 
+#   matrix S is of size DxN. D and N must be int.
+
+# Copyright (c) 2008 Aki Vehtari
+
+# This software is distributed under the GNU General Public 
+# Licence (version 2 or later) please refer to the file 
+# Licence.txt, included with the software, for details.
+    S = np.zeros([N,D])
+    S[:,-1] = (np.linspace(1,N,N,dtype='int')/N)-1/(2*N)*np.ones([N])
+    pn = 2*D
+    p = primes(pn)
+    while(len(p) < D-1):
+        pn = 2*pn
+        p = primes(pn)
+    P = p[0:D-1]
+    for k in np.linspace(0,D-2,D-1,dtype='int'):
+        pk = P[k]
+        for j in np.linspace(1,N,N,dtype='int'):
+            bj = j
+            n = max(1,round(np.log2(bj+1)/np.log2(pk)))
+            while pow(pk,n) <= bj:
+                n += 1
+            b = np.zeros([1,n])
+            b[0,-1] = np.remainder(bj,pk)
+            while (bj > 1) and (n > 1):
+                n -= 1
+                bj = math.floor(bj/pk)
+                b[0,n-1] = np.remainder(bj,pk)
+            S[j-1,k] = np.sum(np.fliplr(b)/np.power(pk,np.linspace(1,b.shape[1],b.shape[1],dtype='int')))
+    return S.T
+
+def peraveCore(oldfield,firstpass): # Push particle
     Np = params.Np # Grab number of particles
     nbins = 32 # Binning for particles?
-    mpart = Np/nbins 
-    n_electron = (params.I*params.lambda0*params.zsep)/(params.e0*params.c) # Number of electrons?
-    p1 = np.zeros([Np,1])
-
-    tslice = np.linspace(1,params.nslices,params.nslices,dtype='int')*( (params.lambda0*params.zsep)/params.c ) # Time slices
-
-    if (params.beamdistribution == 1): # Compute beam distribution
-        profile_b = np.exp(-pow(tslice-tslice[-1]*np.ones(params.nslices)/2,2)/pow(2*params.sigma_t,2))
-    else:
-        profile_b = np.zeros([params.nslices])
-        profile_b[abs(tslice-tslice[-1]*np.ones([params.nslices])/2)<params.sigma_t] = 1
-
-    if (params.laserdistribution == 1): # Compute laser distribution
-        profile_l = np.exp(-pow(tslice-params.slippage*np.ones([params.nslices]),2)/(2*pow(params.sigma_l,2)))
-    else:
-        profile_l = np.zeros([params.nslices])
-        profile_l[abs(tslice-params.slippage*np.ones([params.nslices]))<params.sigma_l] = 1
+    mpart = Np/nbins
     
+    radfield = np.ones([params.Nsnap,params.nslices])*params.E0 # Radiation field
+    radfield[0,:] = params.profile_l*params.E0
+
+    if firstpass == False:
+        radfield[1,:] = oldfield
+
+    thetap = np.zeros([params.Nsnap,params.nslices,Np]) # Phase space arrays
+    gammap = np.zeros([params.Nsnap,params.nslices,Np])
+
+    for islice in np.linspace(0,params.nslices-1,params.nslices,dtype='int'):
+        X0 = hammersley(int(2),Np)
+        print(X0)
+        input('WAIT')
+        gammap[0,islice,:] = params.gamma0 + params.deltagamma*X0[0,:]
+        auxtheta1 = hammersley[1,mpart]*(2*np.pi)/nbins - np.pi
+        print(gammap,auxtheta1)
+        input('WAIT')
+        '''
+        for jbin = 1:nbins
+            for ipart = 1:mpart
+                thetap(1,islice,ipart+(jbin-1)*mpart)=auxtheta1(ipart)+2*(jbin-1)*pi/nbins
+            end
+        end
+
+        if(param.shotnoise)
+            an = 2*sqrt(-log(rand(1))/n_electron)    
+            phin = rand(1)*2*pi
+            for ipart = 1:Np
+            thetap(1,islice,ipart) = thetap(1,islice,ipart)-an*sin(thetap(1,islice,ipart)+phin)
+            end    
+        end
+
+        if (param.prebunching ==1 )
+            thetap(1,islice,:) = thetap(1,islice,:)-2.*param.bunch*sin(thetap(1,islice,:)+param.bunchphase)
+        end
+        if (param.prebunching < 0)
+            thetab  = squeeze(thetap(1,islice,:))
+                gammab = squeeze(gammap(1,islice,:))
+                [thetab,gammab] = buncher(thetab,gammab,param.buncherAmp)
+                for ipart = 1:Np
+                thetap(1,islice,ipart) = thetab(ipart) + param.bunchphase
+                gammap(1,islice,ipart) = gammab(ipart)
+                end
+        end
+
+        bunching(islice) = (sum(exp(1i.*thetap(1,islice,:))/Np))
+    end'''
 
 def peravePostprocessing(): # Postprocess data from core
 
     return 0
 
 def oscLoop(npasses): # Oscillator loop
+    firstpass = True # Flag to indicate first pass of oscillator
     print(f'\nStarting oscillator simulation at {datetime.now().strftime("%d/%m/%Y %H:%M:%S")}.\n')
+
+    oldfield = np.zeros([params.nslices]) # Array to store field from previous pass
+
     simStart = time.time() # Start time
     for i in np.linspace(0,npasses-1,npasses,dtype='int'):
         print(f'Loop {i+1} starting at {datetime.now().strftime("%d/%m/%Y %H:%M:%S")}.')
-        peraveCore()
+        peraveCore(oldfield,firstpass)
+        firstpass = False
     simEnd = time.time() # End time

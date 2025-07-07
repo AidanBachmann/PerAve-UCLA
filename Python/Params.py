@@ -60,7 +60,7 @@ stepsize = lambdau*delz
 
 ## Electron beam parameters
 gamma0 = np.sqrt((k/(2*ku))*(1+pow(K,2))) # Lorentz factor
-Np = int(512) # Number of macroparticles (500-1000 well) 
+Np = int(2) # Number of macroparticles (500-1000 well),512
 Ee = (gamma0*me*pow(c,2))/e0 # Total e-beam energy, gamma*m*c^2 (eV)
 energyspread = 1*20e-15/sigma_t # Absolute energy spread (MeV)
 deltagammarel = energyspread/(gamma0*0.511) # Relative energy spread, dgamma/gamma
@@ -93,3 +93,24 @@ sigma_l = 2400e-15 # ***** Not sure
 ## Simplifying constants
 chi2 = e0/(me*pow(c,2))
 chi1 = ((mu0*c)/2)*(I/A_e)
+
+
+## Initializing simulation arrays based on defined parameters
+# All arrays defined below were previously computed in each pass of PerAve core. It is much more efficient to compute them once and resuse the arrays.
+
+n_electron = (I*lambda0*zsep)/(e0*c) # Number of electrons?
+p1 = np.zeros([Np,1])
+
+tslice = np.linspace(1,nslices,nslices,dtype='int')*( (lambda0*zsep)/c ) # Time slices
+
+if (beamdistribution == 1): # Compute beam distribution
+    profile_b = np.exp(-pow(tslice-tslice[-1]*np.ones(nslices)/2,2)/pow(2*sigma_t,2))
+else:
+    profile_b = np.zeros([nslices])
+    profile_b[abs(tslice-tslice[-1]*np.ones([nslices])/2)<sigma_t] = 1
+
+if (laserdistribution == 1): # Compute laser distribution
+    profile_l = np.exp(-pow(tslice-slippage*np.ones([nslices]),2)/(2*pow(sigma_l,2)))
+else:
+    profile_l = np.zeros([nslices])
+    profile_l[abs(tslice-slippage*np.ones([nslices]))<sigma_l] = 1
