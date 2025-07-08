@@ -184,6 +184,10 @@ def push_FEL_particles_RK4(phasespace,evalue,kvalue,chi1):
     return newphasespace,newevalue
 
 @jit(nopython = True)
+def bukh(phi):
+    return np.sqrt(np.cos(phi)-(np.pi/2-phi)*np.sin(phi))
+
+@jit(nopython = True)
 def peraveCore(oldfield,firstpass,Kz,res_phase): # Push particle
     Np = params.Np # Grab number of particles
     nbins = 32 # Binning for particles?
@@ -252,7 +256,7 @@ def peraveCore(oldfield,firstpass,Kz,res_phase): # Push particle
                 phasespaceold = np.vstack((thetaf,gammaf)).T
                 evaluesold = E_q0
                 
-                phasespacenew,evaluesnew = push_FEL_particles_RK4(phasespaceold,evaluesold,Kz[ij],chi1)       
+                phasespacenew,evaluesnew = push_FEL_particles_RK4(phasespaceold,evaluesold,Kz[ij],chi1)
                 thetap[ij+1,islice,:] = phasespacenew[:,0]
                 gammap[ij+1,islice,:] = phasespacenew[:,1]
                 radfield[ij+1,islice] = evaluesnew
@@ -280,9 +284,46 @@ def peraveCore(oldfield,firstpass,Kz,res_phase): # Push particle
             
             gammares[ij+1] = np.sqrt(params.lambdau*(1+pow(Kz[ij],2))/(2*params.lambda0))
             print(f'Finished snapshot {ij+1} out of {params.Nsnap-1}')
+        # Remove slices within one total slippage length
+        '''radfield[:,0:params.Nslip-1] = [] # Fix later
+        gammap[:,0:params.Nslip-1,:] = []
+        thetap[:,0:params.Nslip-1,:] = []
+        params.profile_l[0:params.Nslip-1] = []
+        params.profile_b[0:params.Nslip-1] = []
+        bunch[:,0:params.Nslip-1] = []'''
     else: # Time independent simulation
-        pass
+        deltagammamax = 1
+        for ij in np.linspace(0,params.Nsnap-2,params.Nsnap-1).astype('int'):  # Takes Nsnap snapshots along length of undulator
+            gammaf = gammap[ij,0,:]
+            thetaf = thetap[ij,0,:]
+            E_q0 = radfield[ij,0]
+            
+            # RK4th order integration     
+            phasespaceold = np.vstack((thetaf,gammaf)).T
+            evaluesold = E_q0
+            phasespacenew,evaluesnew = push_FEL_particles_RK4(phasespaceold,evaluesold,Kz[ij],chi1)     
+            thetap[ij+1,0,:] = phasespacenew[:,0]
+            gammap[ij+1,0,:] = phasespacenew[:,1]
+            radfield[ij+1,0] = evaluesnew
+            
+            # Compute undulator field at next step (constant res phase)
+            Kz[ij+1] = Kz[ij] - (params.stepsize/const_resp)*np.abs(radfield[ij,0])*np.sin(res_phase[ij])
+            gammares[ij+1] = np.sqrt(params.lambdau*(1 + pow(Kz[ij],2))/(2*params.lambda0))
+            bunch[ij] = np.mean(np.exp(1j*thetap[ij,0,:]))
+
+            '''if (ij > 40000) and (params.changeresphase):
+                deltagamma = np.sqrt(Kz[ij+1]*np.mean(np.abs(radfield[ij,:])))*bukh(res_phase[ij])
+                deltagammamax = max(deltagammamax,deltagamma)
+                if ( deltagamma < deltagammamax):
+                     #newphase = fsolve(@(phi) sqrt(Kz(ij+1).*mean(abs(radfield(ij,:)),2))*bukh(phi)-deltagammamax, res_phase(ij)); # Not sure I can make this compatible with jit, I'll leave it commented out for now
+                     pass'''
+            print(f'Finished snapshot {ij+1} out of {params.Nsnap-1}')
     print('Finished solving eqs.')
+
+    # Calculate radiation power 
+    power = np.power(np.abs(radfield),2)/(params.Z0*params.A_e)
+
+    return power
 
 def peravePostprocessing(): # Postprocess data from core
 
