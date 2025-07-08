@@ -36,9 +36,6 @@ k4gamma=param.stepsize*(param.chi2*(kvalue./(phasespace(:,2)+k3gamma)).*...
 newphasespace(:,1)=phasespace(:,1)+1/6*(k1theta+2*k2theta+2*k3theta+k4theta);
 newphasespace(:,2)=phasespace(:,2)+1/6*(k1gamma+2*k2gamma+2*k3gamma+k4gamma);
 
-disp(size(newphasespace))
-input('WAIT')
-
 % RK-4 for the field
 % k1e=-1*param.stepsize*param.chi1*kvalue*mean(exp(-1j*phasespace(:,1))./phasespace(:,2));
 % k2e=-1*param.stepsize*param.chi1*kvalue*mean(exp(-1j*(phasespace(:,1)+0.5*param.stepsize))./(phasespace(:,2)+0.5*param.stepsize));

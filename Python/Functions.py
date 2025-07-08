@@ -183,7 +183,7 @@ def peraveCore(oldfield,firstpass,Kz): # Push particle
     nbins = 32 # Binning for particles?
     mpart = int(Np/nbins)
     
-    radfield = np.ones([params.Nsnap,params.nslices])*params.E0 # Radiation field
+    radfield = np.ones([params.Nsnap,params.nslices],dtype='complex')*params.E0 # Radiation field
     radfield[0,:] = params.profile_l*params.E0
 
     if firstpass == False:
@@ -191,7 +191,7 @@ def peraveCore(oldfield,firstpass,Kz): # Push particle
 
     thetap = np.zeros([params.Nsnap,params.nslices,Np]) # Phase space arrays
     gammap = np.zeros([params.Nsnap,params.nslices,Np])
-    bunching = np.zeros([params.nslices])
+    bunching = np.zeros([params.nslices],dtype='complex')
 
     for islice in np.linspace(0,params.nslices-1,params.nslices,dtype='int'):
         X0 = hammersley(int(2),Np)
@@ -249,6 +249,16 @@ def peraveCore(oldfield,firstpass,Kz): # Push particle
                 thetap[ij+1,islice,:] = phasespacenew[:,0]
                 gammap[ij+1,islice,:] = phasespacenew[:,1]
                 radfield[ij+1,islice] = evaluesnew
+            # Slippage of the radiation field 
+            if ( np.mod(ij,params.zsep) == (params.zsep-1) ): # ***** Check on indexing
+                B = radfield[ij+1,:]
+                B = np.roll(B,1)
+                radfield[ij+1,:] = B
+                if (firstpass == False):
+                    radfield[ij+1,0] = 0
+                else:
+                    radfield[ij+1,0] = params.E0*params.profile_l[0]
+     
 
     else: # Time independent simulation
 
