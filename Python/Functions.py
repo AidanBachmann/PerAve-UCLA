@@ -123,6 +123,29 @@ def hammersley(D,N):
             S[j-1,k] = np.sum(np.fliplr(b)/np.power(pk,np.linspace(1,b.shape[1],b.shape[1],dtype='int')))
     return S.T
 
+def buncher(thetab,gammab,amp): # Buncher
+    amp1 = amp/4.7
+    BR56 = np.pi/(2*(amp+3))
+    BR561 = np.pi/(amp1+3)
+
+    plt.figure(3)
+    gamma0 = np.mean(gammab)
+    gammaspread = np.std(gammab)
+    plt.plot(thetab,gammab)
+    gammarel = (gammab - gamma0)/gammaspread
+    gammarel = gammarel - amp1*np.sin(thetab)
+    plt.figure(6)
+    plt.plot(thetab,gammarel)
+    phaseb = thetab + gammarel*BR561
+    plt.figure(4)
+    plt.plot(phaseb,gammarel)
+    gammarel = gammarel - amp*np.sin(phaseb)
+    phaseb = phaseb+gammarel*BR56
+    energyb = gammarel*gammaspread+gamma0
+    plt.figure(5)
+    plt.plot(phaseb,energyb)
+    return phaseb,energyb
+
 def peraveCore(oldfield,firstpass): # Push particle
     Np = params.Np # Grab number of particles
     nbins = 32 # Binning for particles?
@@ -132,10 +155,11 @@ def peraveCore(oldfield,firstpass): # Push particle
     radfield[0,:] = params.profile_l*params.E0
 
     if firstpass == False:
-        radfield[1,:] = oldfield
+        radfield[0,:] = oldfield
 
     thetap = np.zeros([params.Nsnap,params.nslices,Np]) # Phase space arrays
     gammap = np.zeros([params.Nsnap,params.nslices,Np])
+    bunching = np.zeros([params.nslices])
 
     for islice in np.linspace(0,params.nslices-1,params.nslices,dtype='int'):
         X0 = hammersley(int(2),Np)
@@ -152,22 +176,29 @@ def peraveCore(oldfield,firstpass): # Push particle
             for ipart in np.linspace(0,Np-1,Np,dtpye='int'):
                 thetap[0,islice,ipart] -= an*np.sin(thetap[0,islice,ipart]+phin)
 
-        '''
-        if (param.prebunching ==1 )
-            thetap(1,islice,:) = thetap(1,islice,:)-2.*param.bunch*sin(thetap(1,islice,:)+param.bunchphase)
-        end
-        if (param.prebunching < 0)
-            thetab  = squeeze(thetap(1,islice,:))
-                gammab = squeeze(gammap(1,islice,:))
-                [thetab,gammab] = buncher(thetab,gammab,param.buncherAmp)
-                for ipart = 1:Np
-                thetap(1,islice,ipart) = thetab(ipart) + param.bunchphase
-                gammap(1,islice,ipart) = gammab(ipart)
-                end
-        end
+        if params.prebunching == 1:
+            thetap[0,islice,:] = thetap[0,islice,:]- 2*params.bunch*np.sin(thetap[0,islice,:] + params.bunchphase)
+        
+        if params.prebunching < 0:
+            thetab = np.squeeze(thetap[0,islice,:])
+            gammab = np.squeeze(gammap[0,islice,:])
+            thetab,gammab = buncher(thetab,gammab,params.buncherAmp)
+            for ipart in np.linsapce(0,Np-1,Np,dtype='int'):
+                thetap[0,islice,ipart] = thetab[ipart] + params.bunchphase
+                gammap[0,islice,ipart] = gammab[ipart]
 
-        bunching(islice) = (sum(exp(1i.*thetap(1,islice,:))/Np))
-    end'''
+        bunching[islice] = np.sum(np.exp(1j*thetap[0,islice,:])/Np)
+
+    ## Solve system of equations
+    res_step = params.und_periods*params.lambdau/params.Nsnap   
+    total_simtime = 0
+    hl = 0
+    '''z(1) = 0
+    gammares(1) = np.sqrt(params.lambdau*(1+Kz(1)^2)/2/params.lambda0)            
+    param.stepsize = param.lambdau*param.delz
+    % Constant for the resonant phase based tapering   
+    const_resp=1/param.chi2*(param.lambdau/2/param.lambda0)
+    slip = 0'''
 
 def peravePostprocessing(): # Postprocess data from core
 
