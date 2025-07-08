@@ -47,4 +47,4 @@ tapering_strength = 2   # 0 --> max of slices at time 0, 1 --> max of slices, 2 
 
 filter3 = funcs.filter(sigma_omega,plotFilter) # Compute filter
 
-funcs.oscLoop(npasses) # Oscillator loop
+funcs.oscLoop(npasses,Kz) # Oscillator loop

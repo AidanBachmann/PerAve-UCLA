@@ -146,7 +146,39 @@ def buncher(thetab,gammab,amp): # Buncher
     plt.plot(phaseb,energyb)
     return phaseb,energyb
 
-def peraveCore(oldfield,firstpass): # Push particle
+def push_FEL_particles_RK4(phasespace,evalue,kvalue):
+    gammar_sq = params.lambdau/(2*params.lambda0)*(1+pow(kvalue,2))
+    sc = 1
+    # Euler method for field (for some reason the most accurate...)
+    newevalue = evalue - params.stepsize*(params.chi1*kvalue*sc*np.mean(np.exp(-1j*phasespace[:,0])/phasespace[:,1]))
+
+    # Leapfrog method for the field
+
+    # RK-2 for the field
+    #k1e=-1*param.chi1*kvalue*mean(exp(-1j*phasespace[:,0])./phasespace[:,1])
+    #y1e=evalue+k1e*param.stepsize/2
+    #k2e=-1*param.chi1*kvalue*mean(exp(-1j*(phasespace[:,0]+param.stepsize/2))./(phasespace[:,1]+param.stepsize/2))
+    #newevalue=evalue+k2e*param.stepsize
+    
+    # RK-4 for the particles
+
+    k1theta = params.stepsize*(params.ku*(1-(gammar_sq/pow(phasespace[:,1],2))))
+    k1gamma = params.stepsize*(params.chi2*(kvalue/phasespace[:,1])*np.real(evalue*sc*np.exp(1j*phasespace[:,0])))
+    
+    k2theta = params.stepsize*(params.ku*(1-(gammar_sq/pow(phasespace[:,1]+0.5*k1gamma,2))))
+    k2gamma = params.stepsize*(params.chi2*(kvalue/(phasespace[:,1]+0.5*k1gamma))*np.real(evalue*sc*np.exp(1j*(phasespace[:,0]+0.5*k1theta))))
+    
+    k3theta = params.stepsize*(params.ku*(1-(gammar_sq/pow(phasespace[:,1]+0.5*k2gamma,2))))
+    k3gamma = params.stepsize*(params.chi2*(kvalue/(phasespace[:,1]+0.5*k2gamma))*np.real(evalue*sc*np.exp(1j*(phasespace[:,0]+0.5*k2theta))))
+    
+    k4theta = params.stepsize*(params.ku*(1-(gammar_sq/pow(phasespace[:,1]+k3gamma,2))))
+    k4gamma = params.stepsize*(params.chi2*(kvalue/(phasespace[:,1]+k3gamma))*np.real(evalue*sc*np.exp(1j*(phasespace[:,0]+k3theta))))
+    
+    newphasespace = np.asarray([phasespace[:,0] + 1/6*(k1theta+2*k2theta+2*k3theta+k4theta),phasespace[:,1] + 1/6*(k1gamma+2*k2gamma+2*k3gamma+k4gamma)]).T
+
+    return newphasespace,newevalue
+
+def peraveCore(oldfield,firstpass,Kz): # Push particle
     Np = params.Np # Grab number of particles
     nbins = 32 # Binning for particles?
     mpart = int(Np/nbins)
@@ -166,18 +198,18 @@ def peraveCore(oldfield,firstpass): # Push particle
         gammap[0,islice,:] = params.gamma0 + params.deltagamma*X0[0,:]
         auxtheta1 = hammersley(1,mpart).T*(2*np.pi)/nbins - np.pi
 
-        for jbin in np.linspace(0,nbins,nbins-1,dtype='int'):
-            for ipart in np.linspace(0,mpart,mpart-1,dtype='int'):
-                thetap[0,islice,ipart+jbin*mpart] = auxtheta1[ipart] + 2*jbin*(np.pi/nbins)
+        for jbin in np.linspace(0,nbins-1,nbins,dtype='int'):
+            for ipart in np.linspace(0,mpart-1,mpart,dtype='int'):
+                thetap[0,islice,ipart+jbin*mpart] = auxtheta1[ipart,0] + 2*jbin*(np.pi/nbins)
         
         if params.shotnoise > 0: # Add noise to shot
             an = 2*np.sqrt(-np.log(np.random.rand())/params.n_electron)    
             phin = np.random.rand()*2*np.pi
-            for ipart in np.linspace(0,Np-1,Np,dtpye='int'):
+            for ipart in np.linspace(0,Np-1,Np,dtype='int'):
                 thetap[0,islice,ipart] -= an*np.sin(thetap[0,islice,ipart]+phin)
 
         if params.prebunching == 1:
-            thetap[0,islice,:] = thetap[0,islice,:]- 2*params.bunch*np.sin(thetap[0,islice,:] + params.bunchphase)
+            thetap[0,islice,:] = thetap[0,islice,:] - 2*params.bunch*np.sin(thetap[0,islice,:] + params.bunchphase)
         
         if params.prebunching < 0:
             thetab = np.squeeze(thetap[0,islice,:])
@@ -193,18 +225,40 @@ def peraveCore(oldfield,firstpass): # Push particle
     res_step = params.und_periods*params.lambdau/params.Nsnap   
     total_simtime = 0
     hl = 0
-    '''z(1) = 0
-    gammares(1) = np.sqrt(params.lambdau*(1+Kz(1)^2)/2/params.lambda0)            
-    param.stepsize = param.lambdau*param.delz
-    % Constant for the resonant phase based tapering   
-    const_resp=1/param.chi2*(param.lambdau/2/param.lambda0)
-    slip = 0'''
+    z = np.zeros([1])
+    gammares = np.zeros([params.Nsnap])
+    gammares[0] = np.sqrt(params.lambdau*(1+pow(Kz[0],2))/(2*params.lambda0)) 
+    # Constant for the resonant phase based tapering   
+    const_resp = (1/params.chi2)*(params.lambdau/(2*params.lambda0))
+    slip = 0
+
+    #if params.itdp: # Time dependent simulation
+    if True:
+        for ij in np.linspace(0,params.Nsnap-2,params.Nsnap-1,dtype='int'):  # Takes Nsnap snapshots along length of undulator
+            tstart = time.time()
+            for islice in np.linspace(0,params.nslices-1,params.nslices,dtype='int'):
+                gammaf = np.squeeze(gammap[ij,islice,:])
+                thetaf = np.squeeze(thetap[ij,islice,:])
+                E_q0 = radfield[ij,islice]
+                params.chi1 = (params.mu0*params.c/2)*(params.I*params.profile_b[islice]/params.A_e)
+                # RK4th order integration     
+                phasespaceold = np.asarray([thetaf,gammaf]).T
+                evaluesold = E_q0
+                
+                phasespacenew,evaluesnew = push_FEL_particles_RK4(phasespaceold,evaluesold,Kz[ij])       
+                thetap[ij+1,islice,:] = phasespacenew[:,0]
+                gammap[ij+1,islice,:] = phasespacenew[:,1]
+                radfield[ij+1,islice] = evaluesnew
+
+    else: # Time independent simulation
+
+        pass
 
 def peravePostprocessing(): # Postprocess data from core
 
     return 0
 
-def oscLoop(npasses): # Oscillator loop
+def oscLoop(npasses,Kz): # Oscillator loop
     firstpass = True # Flag to indicate first pass of oscillator
     print(f'\nStarting oscillator simulation at {datetime.now().strftime("%d/%m/%Y %H:%M:%S")}.\n')
 
@@ -213,6 +267,6 @@ def oscLoop(npasses): # Oscillator loop
     simStart = time.time() # Start time
     for i in np.linspace(0,npasses-1,npasses,dtype='int'):
         print(f'Loop {i+1} starting at {datetime.now().strftime("%d/%m/%Y %H:%M:%S")}.')
-        peraveCore(oldfield,firstpass)
+        peraveCore(oldfield,firstpass,Kz)
         firstpass = False
     simEnd = time.time() # End time
