@@ -38,14 +38,8 @@ gammap=zeros(param.Nsnap,param.nslices,Np);
 
 for islice = 1:param.nslices
 X0 = hammersley(2,Np);
-disp('X0c')
-disp(X0)
-input('WAIT')
 gammap(1,islice,:) = gamma0+param.deltagamma*X0(1,:);
 auxtheta1 = hammersley(1,mpart)'*2*pi/nbins-pi;
-disp(gammap)
-disp(auxtheta1)
-input('WAIT')
 for jbin = 1:nbins
     for ipart = 1:mpart
         thetap(1,islice,ipart+(jbin-1)*mpart)=auxtheta1(ipart)+2*(jbin-1)*pi/nbins;

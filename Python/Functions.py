@@ -78,7 +78,7 @@ def primes(num): #  Sieve of Eratosthenes, adapted from: https://www.geeksforgee
                 prime[i] = False
         p += 1
 
-    # Print all prime numbers
+    # Save all prime numbers
     for p in range(2, num+1):
         if prime[p]:
             pArr.append(p)
@@ -126,7 +126,7 @@ def hammersley(D,N):
 def peraveCore(oldfield,firstpass): # Push particle
     Np = params.Np # Grab number of particles
     nbins = 32 # Binning for particles?
-    mpart = Np/nbins
+    mpart = int(Np/nbins)
     
     radfield = np.ones([params.Nsnap,params.nslices])*params.E0 # Radiation field
     radfield[0,:] = params.profile_l*params.E0
@@ -139,27 +139,20 @@ def peraveCore(oldfield,firstpass): # Push particle
 
     for islice in np.linspace(0,params.nslices-1,params.nslices,dtype='int'):
         X0 = hammersley(int(2),Np)
-        print(X0)
-        input('WAIT')
         gammap[0,islice,:] = params.gamma0 + params.deltagamma*X0[0,:]
-        auxtheta1 = hammersley[1,mpart]*(2*np.pi)/nbins - np.pi
-        print(gammap,auxtheta1)
-        input('WAIT')
+        auxtheta1 = hammersley(1,mpart).T*(2*np.pi)/nbins - np.pi
+
+        for jbin in np.linspace(0,nbins,nbins-1,dtype='int'):
+            for ipart in np.linspace(0,mpart,mpart-1,dtype='int'):
+                thetap[0,islice,ipart+jbin*mpart] = auxtheta1[ipart] + 2*jbin*(np.pi/nbins)
+        
+        if params.shotnoise > 0: # Add noise to shot
+            an = 2*np.sqrt(-np.log(np.random.rand())/params.n_electron)    
+            phin = np.random.rand()*2*np.pi
+            for ipart in np.linspace(0,Np-1,Np,dtpye='int'):
+                thetap[0,islice,ipart] -= an*np.sin(thetap[0,islice,ipart]+phin)
+
         '''
-        for jbin = 1:nbins
-            for ipart = 1:mpart
-                thetap(1,islice,ipart+(jbin-1)*mpart)=auxtheta1(ipart)+2*(jbin-1)*pi/nbins
-            end
-        end
-
-        if(param.shotnoise)
-            an = 2*sqrt(-log(rand(1))/n_electron)    
-            phin = rand(1)*2*pi
-            for ipart = 1:Np
-            thetap(1,islice,ipart) = thetap(1,islice,ipart)-an*sin(thetap(1,islice,ipart)+phin)
-            end    
-        end
-
         if (param.prebunching ==1 )
             thetap(1,islice,:) = thetap(1,islice,:)-2.*param.bunch*sin(thetap(1,islice,:)+param.bunchphase)
         end

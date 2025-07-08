@@ -39,7 +39,7 @@ param.stepsize = param.lambdau*param.delz;
 
 %% Electron beam parameters
 gamma0 = sqrt(param.k/2/param.ku*(1+param.K^2));param.gamma0=gamma0;          % relativistic gamma factor
-param.Np = 2;                                          % # of macroparticles (500-1000 well)
+param.Np = 512;                                          % # of macroparticles (500-1000 well)
 param.Ee = gamma0*me*c^2/e0;                  % Total e-beam energy (eV)
 energyspread = 1*20e-15/param.sigma_t;                                       % Absolute energy spread MeV
 param.deltagammarel = energyspread/gamma0/0.511;          % Relative energy spread dgamma/gamma

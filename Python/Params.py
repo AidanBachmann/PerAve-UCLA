@@ -60,7 +60,7 @@ stepsize = lambdau*delz
 
 ## Electron beam parameters
 gamma0 = np.sqrt((k/(2*ku))*(1+pow(K,2))) # Lorentz factor
-Np = int(2) # Number of macroparticles (500-1000 well),512
+Np = int(512) # Number of macroparticles (500-1000 well)
 Ee = (gamma0*me*pow(c,2))/e0 # Total e-beam energy, gamma*m*c^2 (eV)
 energyspread = 1*20e-15/sigma_t # Absolute energy spread (MeV)
 deltagammarel = energyspread/(gamma0*0.511) # Relative energy spread, dgamma/gamma
