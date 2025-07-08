@@ -48,7 +48,8 @@ Nslip = round(Nsnap/zsep) # ***** Not sure
 shotnoise = 1 # ***** Not sure
 lambda0 = 13.5e-9 # Seed wavelength (m)
 k = (2*np.pi)/lambda0 # Wavenumber in free space
-nslices = 4*Nslip + 4*round((sigma_t/(zsep*lambda0))*c) # ***** Not sure
+#nslices = 4*Nslip + 4*round((sigma_t/(zsep*lambda0))*c) # ***** Not sure
+nslices = 100
 
 if itdp == 0:
     print('\nRunning time independent simulation.\n')

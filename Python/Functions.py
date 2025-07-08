@@ -126,27 +126,28 @@ def hammersley(D,N):
             S[j-1,k] = np.sum(np.fliplr(b)/np.power(pk,np.linspace(1,b.shape[1],b.shape[1]).astype('int')))
     return S.T
 
+@jit(nopython = True)
 def buncher(thetab,gammab,amp): # Buncher
     amp1 = amp/4.7
     BR56 = np.pi/(2*(amp+3))
     BR561 = np.pi/(amp1+3)
 
-    plt.figure(3)
+    #plt.figure(3)
     gamma0 = np.mean(gammab)
     gammaspread = np.std(gammab)
-    plt.plot(thetab,gammab)
+    #plt.plot(thetab,gammab)
     gammarel = (gammab - gamma0)/gammaspread
     gammarel = gammarel - amp1*np.sin(thetab)
-    plt.figure(6)
-    plt.plot(thetab,gammarel)
+    #plt.figure(6)
+    #plt.plot(thetab,gammarel)
     phaseb = thetab + gammarel*BR561
-    plt.figure(4)
-    plt.plot(phaseb,gammarel)
+    #plt.figure(4)
+    #plt.plot(phaseb,gammarel)
     gammarel = gammarel - amp*np.sin(phaseb)
-    phaseb = phaseb+gammarel*BR56
-    energyb = gammarel*gammaspread+gamma0
-    plt.figure(5)
-    plt.plot(phaseb,energyb)
+    phaseb = phaseb + gammarel*BR56
+    energyb = gammarel*gammaspread + gamma0
+    #plt.figure(5)
+    #plt.plot(phaseb,energyb)
     return phaseb,energyb
 
 @jit(nopython = True)
@@ -166,62 +167,63 @@ def push_FEL_particles_RK4(phasespace,evalue,kvalue):
     
     # RK-4 for the particles
 
-    k1theta = params.stepsize*(params.ku*(1-(gammar_sq/pow(phasespace[:,1],2))))
+    k1theta = params.stepsize*(params.ku*(1-(gammar_sq/np.square(phasespace[:,1]))))
     k1gamma = params.stepsize*(params.chi2*(kvalue/phasespace[:,1])*np.real(evalue*sc*np.exp(1j*phasespace[:,0])))
     
-    k2theta = params.stepsize*(params.ku*(1-(gammar_sq/pow(phasespace[:,1]+0.5*k1gamma,2))))
+    k2theta = params.stepsize*(params.ku*(1-(gammar_sq/np.square(phasespace[:,1]+0.5*k1gamma))))
     k2gamma = params.stepsize*(params.chi2*(kvalue/(phasespace[:,1]+0.5*k1gamma))*np.real(evalue*sc*np.exp(1j*(phasespace[:,0]+0.5*k1theta))))
     
-    k3theta = params.stepsize*(params.ku*(1-(gammar_sq/pow(phasespace[:,1]+0.5*k2gamma,2))))
+    k3theta = params.stepsize*(params.ku*(1-(gammar_sq/np.square(phasespace[:,1]+0.5*k2gamma))))
     k3gamma = params.stepsize*(params.chi2*(kvalue/(phasespace[:,1]+0.5*k2gamma))*np.real(evalue*sc*np.exp(1j*(phasespace[:,0]+0.5*k2theta))))
     
-    k4theta = params.stepsize*(params.ku*(1-(gammar_sq/pow(phasespace[:,1]+k3gamma,2))))
+    k4theta = params.stepsize*(params.ku*(1-(gammar_sq/np.square(phasespace[:,1]+k3gamma))))
     k4gamma = params.stepsize*(params.chi2*(kvalue/(phasespace[:,1]+k3gamma))*np.real(evalue*sc*np.exp(1j*(phasespace[:,0]+k3theta))))
     
-    newphasespace = np.asarray([phasespace[:,0] + 1/6*(k1theta+2*k2theta+2*k3theta+k4theta),phasespace[:,1] + 1/6*(k1gamma+2*k2gamma+2*k3gamma+k4gamma)]).T
+    newphasespace = np.vstack((phasespace[:,0] + 1/6*(k1theta+2*k2theta+2*k3theta+k4theta),phasespace[:,1] + 1/6*(k1gamma+2*k2gamma+2*k3gamma+k4gamma))).T
 
     return newphasespace,newevalue
 
+#@jit(nopython = True)
 def peraveCore(oldfield,firstpass,Kz): # Push particle
     Np = params.Np # Grab number of particles
     nbins = 32 # Binning for particles?
     mpart = int(Np/nbins)
     
-    radfield = np.ones([params.Nsnap,params.nslices],dtype='complex')*params.E0 # Radiation field
+    radfield = np.ones((params.Nsnap,params.nslices)).astype('complex')*params.E0 # Radiation field
     radfield[0,:] = params.profile_l*params.E0
 
     if firstpass == False:
         radfield[0,:] = oldfield
 
-    thetap = np.zeros([params.Nsnap,params.nslices,Np]) # Phase space arrays
-    gammap = np.zeros([params.Nsnap,params.nslices,Np])
-    bunching = np.zeros([params.nslices],dtype='complex')
+    thetap = np.zeros((params.Nsnap,params.nslices,Np)) # Phase space arrays
+    gammap = np.zeros((params.Nsnap,params.nslices,Np))
+    bunching = np.zeros((params.nslices)).astype('complex')
 
-    for islice in np.linspace(0,params.nslices-1,params.nslices,dtype='int'):
+    for islice in np.linspace(0,params.nslices-1,params.nslices).astype('int'):
         X0 = hammersley(int(2),Np)
         gammap[0,islice,:] = params.gamma0 + params.deltagamma*X0[0,:]
         auxtheta1 = hammersley(1,mpart).T*(2*np.pi)/nbins - np.pi
         if islice % 100 == 0:
             print(f'slice {islice} out of {params.nslices}')
 
-        for jbin in np.linspace(0,nbins-1,nbins,dtype='int'):
-            for ipart in np.linspace(0,mpart-1,mpart,dtype='int'):
+        for jbin in np.linspace(0,nbins-1,nbins).astype('int'):
+            for ipart in np.linspace(0,mpart-1,mpart).astype('int'):
                 thetap[0,islice,ipart+jbin*mpart] = auxtheta1[ipart,0] + 2*jbin*(np.pi/nbins)
         
         if params.shotnoise > 0: # Add noise to shot
             an = 2*np.sqrt(-np.log(np.random.rand())/params.n_electron)    
             phin = np.random.rand()*2*np.pi
-            for ipart in np.linspace(0,Np-1,Np,dtype='int'):
+            for ipart in np.linspace(0,Np-1,Np).astype('int'):
                 thetap[0,islice,ipart] -= an*np.sin(thetap[0,islice,ipart]+phin)
 
         if params.prebunching == 1:
             thetap[0,islice,:] -= 2*params.bunch*np.sin(thetap[0,islice,:] + params.bunchphase)
         
         if params.prebunching < 0:
-            thetab = np.squeeze(thetap[0,islice,:])
-            gammab = np.squeeze(gammap[0,islice,:])
+            thetab = thetap[0,islice,:]
+            gammab = gammap[0,islice,:]
             thetab,gammab = buncher(thetab,gammab,params.buncherAmp)
-            for ipart in np.linsapce(0,Np-1,Np,dtype='int'):
+            for ipart in np.linspace(0,Np-1,Np).astype('int'):
                 thetap[0,islice,ipart] = thetab[ipart] + params.bunchphase
                 gammap[0,islice,ipart] = gammab[ipart]
 
@@ -231,19 +233,19 @@ def peraveCore(oldfield,firstpass,Kz): # Push particle
     res_step = params.und_periods*params.lambdau/params.Nsnap   
     total_simtime = 0
     hl = 0
-    z = np.zeros([1])
-    gammares = np.zeros([params.Nsnap])
+    z = np.zeros((1))
+    gammares = np.zeros((params.Nsnap))
     gammares[0] = np.sqrt(params.lambdau*(1+pow(Kz[0],2))/(2*params.lambda0)) 
     # Constant for the resonant phase based tapering   
     const_resp = (1/params.chi2)*(params.lambdau/(2*params.lambda0))
     slip = 0
 
     if params.itdp == int(1): # Time dependent simulation
-        for ij in np.linspace(0,params.Nsnap-2,params.Nsnap-1,dtype='int'):  # Takes Nsnap snapshots along length of undulator
-            tstart = time.time()
-            for islice in np.linspace(0,params.nslices-1,params.nslices,dtype='int'):
-                gammaf = np.squeeze(gammap[ij,islice,:])
-                thetaf = np.squeeze(thetap[ij,islice,:])
+        for ij in np.linspace(0,params.Nsnap-2,params.Nsnap-1).astype('int'):  # Takes Nsnap snapshots along length of undulator
+            #tstart = time.time()
+            for islice in np.linspace(0,params.nslices-1,params.nslices).astype('int'):
+                gammaf = gammap[ij,islice,:]
+                thetaf = thetap[ij,islice,:]
                 E_q0 = radfield[ij,islice]
                 params.chi1 = (params.mu0*params.c/2)*(params.I*params.profile_b[islice]/params.A_e)
                 # RK4th order integration     
@@ -264,10 +266,6 @@ def peraveCore(oldfield,firstpass,Kz): # Push particle
                 else:
                     radfield[ij+1,0] = params.E0*params.profile_l[0]
             ff = np.mean(np.exp(1j*thetap[ij,:,:]),1)
-            print('OOGA BOOGA')
-            print(thetap.shape)
-            print(ff.shape)
-            input('WAIT')
      
 
     else: # Time independent simulation

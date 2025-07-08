@@ -121,10 +121,6 @@ for ij = 1:param.Nsnap-1  % takes Nsnap snapshots along length of undulator
             end
             
             % Compute bunching
-            disp('OOGA BOOGA')
-            disp(size(thetap))
-            disp(size(mean(exp(1j.*thetap(ij,:,:)),3)))
-            input('WAIT')
             bunch(ij,:)=(mean(exp(1j.*thetap(ij,:,:)),3)); % shape(thetap) = (Nsnap,nslices,Np)
             
             % Compute undulator field at next step (constant res phase)
