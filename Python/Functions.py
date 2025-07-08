@@ -6,6 +6,7 @@ import numpy as np
 import math
 import time
 from datetime import datetime
+from numba import jit
 import matplotlib.pyplot as plt
 import Params as params
 
@@ -64,6 +65,7 @@ def filter(sigma_omega,plotFilter): # Compute filters
         plt.show()
     return filter3
 
+@jit(nopython = True)
 def primes(num): #  Sieve of Eratosthenes, adapted from: https://www.geeksforgeeks.org/python/python-program-for-sieve-of-eratosthenes/
     prime = [True for i in range(num+1)]
     pArr = []
@@ -84,6 +86,7 @@ def primes(num): #  Sieve of Eratosthenes, adapted from: https://www.geeksforgee
             pArr.append(p)
     return np.asarray(pArr)
 
+@jit(nopython = True)
 def hammersley(D,N):
 # HAMMERSLEY - Hammersley quasi-random sequence
 # 
@@ -99,28 +102,28 @@ def hammersley(D,N):
 # This software is distributed under the GNU General Public 
 # Licence (version 2 or later) please refer to the file 
 # Licence.txt, included with the software, for details.
-    S = np.zeros([N,D])
-    S[:,-1] = (np.linspace(1,N,N,dtype='int')/N)-1/(2*N)*np.ones([N])
+    S = np.zeros((N,D))
+    S[:,-1] = (np.linspace(1,N,N).astype('int')/N)-1/(2*N)*np.ones((N))
     pn = 2*D
     p = primes(pn)
     while(len(p) < D-1):
         pn = 2*pn
         p = primes(pn)
     P = p[0:D-1]
-    for k in np.linspace(0,D-2,D-1,dtype='int'):
+    for k in np.linspace(0,D-2,D-1).astype('int'):
         pk = P[k]
-        for j in np.linspace(1,N,N,dtype='int'):
+        for j in np.linspace(1,N,N).astype('int'):
             bj = j
             n = max(1,round(np.log2(bj+1)/np.log2(pk)))
             while pow(pk,n) <= bj:
                 n += 1
-            b = np.zeros([1,n])
+            b = np.zeros((1,n))
             b[0,-1] = np.remainder(bj,pk)
             while (bj > 1) and (n > 1):
                 n -= 1
                 bj = math.floor(bj/pk)
                 b[0,n-1] = np.remainder(bj,pk)
-            S[j-1,k] = np.sum(np.fliplr(b)/np.power(pk,np.linspace(1,b.shape[1],b.shape[1],dtype='int')))
+            S[j-1,k] = np.sum(np.fliplr(b)/np.power(pk,np.linspace(1,b.shape[1],b.shape[1]).astype('int')))
     return S.T
 
 def buncher(thetab,gammab,amp): # Buncher
@@ -146,6 +149,7 @@ def buncher(thetab,gammab,amp): # Buncher
     plt.plot(phaseb,energyb)
     return phaseb,energyb
 
+@jit(nopython = True)
 def push_FEL_particles_RK4(phasespace,evalue,kvalue):
     gammar_sq = params.lambdau/(2*params.lambda0)*(1+pow(kvalue,2))
     sc = 1
@@ -197,6 +201,8 @@ def peraveCore(oldfield,firstpass,Kz): # Push particle
         X0 = hammersley(int(2),Np)
         gammap[0,islice,:] = params.gamma0 + params.deltagamma*X0[0,:]
         auxtheta1 = hammersley(1,mpart).T*(2*np.pi)/nbins - np.pi
+        if islice % 100 == 0:
+            print(f'slice {islice} out of {params.nslices}')
 
         for jbin in np.linspace(0,nbins-1,nbins,dtype='int'):
             for ipart in np.linspace(0,mpart-1,mpart,dtype='int'):
@@ -209,7 +215,7 @@ def peraveCore(oldfield,firstpass,Kz): # Push particle
                 thetap[0,islice,ipart] -= an*np.sin(thetap[0,islice,ipart]+phin)
 
         if params.prebunching == 1:
-            thetap[0,islice,:] = thetap[0,islice,:] - 2*params.bunch*np.sin(thetap[0,islice,:] + params.bunchphase)
+            thetap[0,islice,:] -= 2*params.bunch*np.sin(thetap[0,islice,:] + params.bunchphase)
         
         if params.prebunching < 0:
             thetab = np.squeeze(thetap[0,islice,:])
@@ -232,8 +238,7 @@ def peraveCore(oldfield,firstpass,Kz): # Push particle
     const_resp = (1/params.chi2)*(params.lambdau/(2*params.lambda0))
     slip = 0
 
-    #if params.itdp: # Time dependent simulation
-    if True:
+    if params.itdp == int(1): # Time dependent simulation
         for ij in np.linspace(0,params.Nsnap-2,params.Nsnap-1,dtype='int'):  # Takes Nsnap snapshots along length of undulator
             tstart = time.time()
             for islice in np.linspace(0,params.nslices-1,params.nslices,dtype='int'):
@@ -258,6 +263,11 @@ def peraveCore(oldfield,firstpass,Kz): # Push particle
                     radfield[ij+1,0] = 0
                 else:
                     radfield[ij+1,0] = params.E0*params.profile_l[0]
+            ff = np.mean(np.exp(1j*thetap[ij,:,:]),1)
+            print('OOGA BOOGA')
+            print(thetap.shape)
+            print(ff.shape)
+            input('WAIT')
      
 
     else: # Time independent simulation

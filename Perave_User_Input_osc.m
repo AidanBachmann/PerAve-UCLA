@@ -14,7 +14,7 @@ param.psir = pi/6;
 
 %% Simulation control options
 param.phasespacemovie=0;
-param.itdp = 0; % 1 for time-dependent simulation, 0 for time independent
+param.itdp = 1; % 1 for time-dependent simulation, 0 for time independent
 param.prebunching = 1;                                                                  % set to 1 to start from a pre-bunched beam. 
 param.changeresphase = 0;
 saveoutput=0;

@@ -35,7 +35,7 @@ psir = np.pi/6 # Phase
 
 ## Simulation control options
 phasespacemovie = int(0) # Create phase space movie
-itdp = int(0) # 1 for time-dependent simulation, 0 for time independent
+itdp = int(1) # 1 for time-dependent simulation, 0 for time independent
 prebunching = int(1) # Prebunching boolean, set to 1 to start from a pre-bunched beam
 changeresphase = 0 # ***** Not sure
 saveoutput = int(0) # Save output bool
@@ -48,7 +48,7 @@ Nslip = round(Nsnap/zsep) # ***** Not sure
 shotnoise = 1 # ***** Not sure
 lambda0 = 13.5e-9 # Seed wavelength (m)
 k = (2*np.pi)/lambda0 # Wavenumber in free space
-nslices = 4*Nslip+4*round(sigma_t/zsep/lambda0*c) # ***** Not sure
+nslices = 4*Nslip + 4*round((sigma_t/(zsep*lambda0))*c) # ***** Not sure
 
 if itdp == 0:
     print('\nRunning time independent simulation.\n')
