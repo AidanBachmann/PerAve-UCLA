@@ -29,7 +29,8 @@ K = 1.934 # RMS undulator parameter, e0*Bfield*/me/c/ku
 ku = (2*np.pi)/lambdau # Undulator wavenumber
 lwig = 9.42 # Undulator length (m), paper defines number of undulator periods and lambdau, so lwig is computed from these vals
 # Tapering options
-tapering = int(0) # Set tapering (-1 acceleration, 0 no tapering, 1 decelation)    
+tapering = int(0) # Set tapering (-1 acceleration, 0 no tapering, 1 decelation)   
+tapering_strength = int(2)   # 0 --> max of slices at time 0, 1 --> max of slices, 2 --> avg of slices 
 z0 = 0
 psir = np.pi/6 # Phase
 
@@ -48,8 +49,7 @@ Nslip = round(Nsnap/zsep) # ***** Not sure
 shotnoise = 1 # ***** Not sure
 lambda0 = 13.5e-9 # Seed wavelength (m)
 k = (2*np.pi)/lambda0 # Wavenumber in free space
-#nslices = 4*Nslip + 4*round((sigma_t/(zsep*lambda0))*c) # ***** Not sure
-nslices = 100
+nslices = 4*Nslip + 4*round((sigma_t/(zsep*lambda0))*c) # ***** Not sure
 
 if itdp == 0:
     print('\nRunning time independent simulation.\n')

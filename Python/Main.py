@@ -42,9 +42,7 @@ Lgain3D = funcs.correction3D(Lgain) # Compute 3D correction to Lgain
 cavitydetuning = -16 # In units of zsep
 transmission = 0.66 # Power transmission through one cavity pass, losses = 1 - transmission                                
 sigma_omega = 0.003*params.nslices*params.zsep # Filter fractional bandwidth
-firstpass = int(1)
-tapering_strength = 2   # 0 --> max of slices at time 0, 1 --> max of slices, 2 --> avg of slices
 
 filter3 = funcs.filter(sigma_omega,plotFilter) # Compute filter
 
-funcs.oscLoop(npasses,Kz) # Oscillator loop
+funcs.oscLoop(npasses,Kz,res_phase) # Oscillator loop

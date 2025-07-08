@@ -151,18 +151,18 @@ def buncher(thetab,gammab,amp): # Buncher
     return phaseb,energyb
 
 @jit(nopython = True)
-def push_FEL_particles_RK4(phasespace,evalue,kvalue):
+def push_FEL_particles_RK4(phasespace,evalue,kvalue,chi1):
     gammar_sq = params.lambdau/(2*params.lambda0)*(1+pow(kvalue,2))
     sc = 1
     # Euler method for field (for some reason the most accurate...)
-    newevalue = evalue - params.stepsize*(params.chi1*kvalue*sc*np.mean(np.exp(-1j*phasespace[:,0])/phasespace[:,1]))
+    newevalue = evalue - params.stepsize*(chi1*kvalue*sc*np.mean(np.exp(-1j*phasespace[:,0])/phasespace[:,1]))
 
     # Leapfrog method for the field
 
     # RK-2 for the field
-    #k1e=-1*param.chi1*kvalue*mean(exp(-1j*phasespace[:,0])./phasespace[:,1])
+    #k1e=-1*chi1*kvalue*mean(exp(-1j*phasespace[:,0])./phasespace[:,1])
     #y1e=evalue+k1e*param.stepsize/2
-    #k2e=-1*param.chi1*kvalue*mean(exp(-1j*(phasespace[:,0]+param.stepsize/2))./(phasespace[:,1]+param.stepsize/2))
+    #k2e=-1*chi1*kvalue*mean(exp(-1j*(phasespace[:,0]+param.stepsize/2))./(phasespace[:,1]+param.stepsize/2))
     #newevalue=evalue+k2e*param.stepsize
     
     # RK-4 for the particles
@@ -183,8 +183,8 @@ def push_FEL_particles_RK4(phasespace,evalue,kvalue):
 
     return newphasespace,newevalue
 
-#@jit(nopython = True)
-def peraveCore(oldfield,firstpass,Kz): # Push particle
+@jit(nopython = True)
+def peraveCore(oldfield,firstpass,Kz,res_phase): # Push particle
     Np = params.Np # Grab number of particles
     nbins = 32 # Binning for particles?
     mpart = int(Np/nbins)
@@ -203,8 +203,6 @@ def peraveCore(oldfield,firstpass,Kz): # Push particle
         X0 = hammersley(int(2),Np)
         gammap[0,islice,:] = params.gamma0 + params.deltagamma*X0[0,:]
         auxtheta1 = hammersley(1,mpart).T*(2*np.pi)/nbins - np.pi
-        if islice % 100 == 0:
-            print(f'slice {islice} out of {params.nslices}')
 
         for jbin in np.linspace(0,nbins-1,nbins).astype('int'):
             for ipart in np.linspace(0,mpart-1,mpart).astype('int'):
@@ -228,6 +226,8 @@ def peraveCore(oldfield,firstpass,Kz): # Push particle
                 gammap[0,islice,ipart] = gammab[ipart]
 
         bunching[islice] = np.sum(np.exp(1j*thetap[0,islice,:])/Np)
+    
+    print(f'Finished init.')
 
     ## Solve system of equations
     res_step = params.und_periods*params.lambdau/params.Nsnap   
@@ -239,20 +239,20 @@ def peraveCore(oldfield,firstpass,Kz): # Push particle
     # Constant for the resonant phase based tapering   
     const_resp = (1/params.chi2)*(params.lambdau/(2*params.lambda0))
     slip = 0
+    bunch = np.zeros((params.Nsnap,params.nslices)).astype('complex') # Bunching array
 
     if params.itdp == int(1): # Time dependent simulation
         for ij in np.linspace(0,params.Nsnap-2,params.Nsnap-1).astype('int'):  # Takes Nsnap snapshots along length of undulator
-            #tstart = time.time()
             for islice in np.linspace(0,params.nslices-1,params.nslices).astype('int'):
                 gammaf = gammap[ij,islice,:]
                 thetaf = thetap[ij,islice,:]
                 E_q0 = radfield[ij,islice]
-                params.chi1 = (params.mu0*params.c/2)*(params.I*params.profile_b[islice]/params.A_e)
+                chi1 = (params.mu0*params.c/2)*(params.I*params.profile_b[islice]/params.A_e)
                 # RK4th order integration     
-                phasespaceold = np.asarray([thetaf,gammaf]).T
+                phasespaceold = np.vstack((thetaf,gammaf)).T
                 evaluesold = E_q0
                 
-                phasespacenew,evaluesnew = push_FEL_particles_RK4(phasespaceold,evaluesold,Kz[ij])       
+                phasespacenew,evaluesnew = push_FEL_particles_RK4(phasespaceold,evaluesold,Kz[ij],chi1)       
                 thetap[ij+1,islice,:] = phasespacenew[:,0]
                 gammap[ij+1,islice,:] = phasespacenew[:,1]
                 radfield[ij+1,islice] = evaluesnew
@@ -265,18 +265,30 @@ def peraveCore(oldfield,firstpass,Kz): # Push particle
                     radfield[ij+1,0] = 0
                 else:
                     radfield[ij+1,0] = params.E0*params.profile_l[0]
-            ff = np.mean(np.exp(1j*thetap[ij,:,:]),1)
-     
-
+            
+            for k in np.linspace(0,params.nslices-1,params.nslices).astype('int'): # Loop to compute mean since jit doesn't support axis kwarg in mean function
+                bunch[ij,k] = np.mean(np.exp(1j*thetap[ij,k,:])) # shape(thetap) = (Nsnap,nslices,Np)
+            
+            if firstpass == True:
+                if params.tapering_strength == 0:
+                    Klz = max(np.abs(radfield[0,:]))
+                elif params.tapering_strength == 1:
+                    Klz = max(np.abs(radfield[ij,:]))
+                elif params.tapering_strength == 2:
+                    Klz = np.mean(np.abs(radfield[ij,:]))
+                Kz[ij+1] = Kz[ij] - (params.stepsize/const_resp)*Klz*np.sin(res_phase[ij]) # ***** I think this should be outside of the firstpass if statement. Pietro code has it inside if statement.
+            
+            gammares[ij+1] = np.sqrt(params.lambdau*(1+pow(Kz[ij],2))/(2*params.lambda0))
+            print(f'Finished snapshot {ij+1} out of {params.Nsnap-1}')
     else: # Time independent simulation
-
         pass
+    print('Finished solving eqs.')
 
 def peravePostprocessing(): # Postprocess data from core
 
     return 0
 
-def oscLoop(npasses,Kz): # Oscillator loop
+def oscLoop(npasses,Kz,res_phase): # Oscillator loop
     firstpass = True # Flag to indicate first pass of oscillator
     print(f'\nStarting oscillator simulation at {datetime.now().strftime("%d/%m/%Y %H:%M:%S")}.\n')
 
@@ -285,6 +297,6 @@ def oscLoop(npasses,Kz): # Oscillator loop
     simStart = time.time() # Start time
     for i in np.linspace(0,npasses-1,npasses,dtype='int'):
         print(f'Loop {i+1} starting at {datetime.now().strftime("%d/%m/%Y %H:%M:%S")}.')
-        peraveCore(oldfield,firstpass,Kz)
+        peraveCore(oldfield,firstpass,Kz,res_phase)
         firstpass = False
     simEnd = time.time() # End time
