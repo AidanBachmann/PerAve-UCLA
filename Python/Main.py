@@ -45,4 +45,4 @@ sigma_omega = 0.003*params.nslices*params.zsep # Filter fractional bandwidth
 
 filter3 = funcs.filter(sigma_omega,plotFilter) # Compute filter
 
-funcs.oscLoop(npasses,Kz,res_phase) # Oscillator loop
+funcs.oscLoop(npasses,Kz,res_phase,rho1D) # Oscillator loop
