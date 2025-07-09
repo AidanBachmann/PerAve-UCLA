@@ -3,6 +3,7 @@
 # ---------- Imports ----------
 
 import numpy as np
+import scipy
 import math
 import time
 from datetime import datetime
@@ -322,12 +323,37 @@ def peraveCore(oldfield,firstpass,Kz,res_phase): # Push particle
 
     # Calculate radiation power 
     power = np.power(np.abs(radfield),2)/(params.Z0*params.A_e)
+    return power,radfield
 
-    return power
+def spectrum_calc(field,xlamds,zsep): # Compute spectrum
+    omegas = (2*np.pi*params.c)/xlamds
+    df = (2*np.pi*params.c)/(params.nslices*zsep*xlamds)
+    ft = scipy.fft.fftshift(scipy.fft.fft(field))
+    omega = df*np.linspace(1,len(ft),len(ft),dtype='int')
+    omega -= np.median(omega) + omegas
+    omega /= omegas
+    power_spectrum = pow(abs(ft),2);
+    omega -= 1
+    return power_spectrum,omega
 
-def peravePostprocessing(): # Postprocess data from core
+def peravePostprocessing(radfield): # Postprocess data from core
+    kw = 2*np.pi/params.lambdau
+    zpos = np.linspace(0,params.Nsnap-1,params.Nsnap,dtype='int')*params.stepsize # ***** Matlab 1 indexing means that Matlab version runs over np.linspace(1,params.Nsnap,params.Nsnap,dtype='int')
 
-    return 0
+    ## Spectrum as a function of z
+    fundpower = np.zeros([params.Nsnap]) # Power
+    sidebandpower = np.zeros([params.Nsnap])
+    if params.itdp == 1:
+        omegamin = -10e-4
+        omegamax = 10e-4
+        for n in np.linspace(0,params.Nsnap-1,params.Nsnap,dtype='int'):
+            powerspec,omega = spectrum_calc(radfield[n,:],params.lambda0,params.zsep)
+            idxMin = np.where(omega > omegamin) # Sideband index
+            idxMax = np.where(omega < omegamax)
+            fundspectrum = powerspec[idxMin[0][0]:idxMax[0][-1]]
+            fundpower[n] = np.trapz(fundspectrum)/np.trapz(powerspec)
+        ## *** Plotting goes here ***
+
 
 def oscLoop(npasses,Kz,res_phase): # Oscillator loop
     firstpass = True # Flag to indicate first pass of oscillator
@@ -339,9 +365,10 @@ def oscLoop(npasses,Kz,res_phase): # Oscillator loop
     for i in np.linspace(0,npasses-1,npasses,dtype='int'):
         print(f'Loop {i+1} starting at {datetime.now().strftime("%d/%m/%Y %H:%M:%S")}.')
         start = time.time()
-        power = peraveCore(oldfield,firstpass,Kz,res_phase)
+        power,radfield = peraveCore(oldfield,firstpass,Kz,res_phase)
         end = time.time()
         print(f'Finished loop {i+1} in {end-start} seconds.\n')
+        peravePostprocessing(radfield)
         firstpass = False
     simEnd = time.time() # End time
     print(f'Finished simulation in {simEnd-simStart} seconds.\n')

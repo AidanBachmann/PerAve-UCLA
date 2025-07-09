@@ -14,6 +14,7 @@ eps0 = 8.85418782e-12 # Permittivity of free space
 mu0 = 1.256637e-6 # Permeability of free space
 IA = 17045 # Alfven current
 Z0 = 376.73 # Impedance of free space
+hbar = 6.582e-16 # Reduced Planck constant
 
 # ---------- Parameters ----------
 
