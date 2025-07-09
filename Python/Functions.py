@@ -323,7 +323,8 @@ def peraveCore(oldfield,firstpass,Kz,res_phase): # Push particle
 
     # Calculate radiation power 
     power = np.power(np.abs(radfield),2)/(params.Z0*params.A_e)
-    return power,radfield
+
+    return power,radfield,gammap,thetap
 
 def spectrum_calc(field,xlamds,zsep): # Compute spectrum
     omegas = (2*np.pi*params.c)/xlamds
@@ -336,7 +337,7 @@ def spectrum_calc(field,xlamds,zsep): # Compute spectrum
     omega -= 1
     return power_spectrum,omega
 
-def peravePostprocessing(radfield,power): # Postprocess data from core
+def peravePostprocessing(radfield,power,gammap,thetap): # Postprocess data from core
     kw = 2*np.pi/params.lambdau
     zpos = np.linspace(0,params.Nsnap-1,params.Nsnap,dtype='int')*params.stepsize # ***** Matlab 1 indexing means that Matlab version runs over np.linspace(1,params.Nsnap,params.Nsnap,dtype='int')
 
@@ -358,7 +359,7 @@ def peravePostprocessing(radfield,power): # Postprocess data from core
         ## *** Spectrum plotting goes here ***
     
     ## Radiation Power and spectrum at exit
-    fig,ax = plt.subplots(nrows=2,ncols=3,figsze=(16,9))
+    fig,ax = plt.subplots(nrows=2,ncols=3,figsize=(16,9))
     ax = ax.flatten()
     fig.suptitle('Simulation Output')
 
@@ -370,21 +371,30 @@ def peravePostprocessing(radfield,power): # Postprocess data from core
     ax[0].set_ylabel('Power')
     ax[0].set_title('Radiation Power along the beam')
     ax[0].legend()
-    input('WAIT')
 
     if params.itdp == 1:
         xax = (params.zsep*params.lambda0*1e15/params.c)*np.linspace(0,power.shape[1]-1,power.shape[1],dtype='int')
         ax[1].plot(xax,power[-1,:],label='Final Power')
-        ax[1].plot(xax,(np.max(power[-1,:]))*params.profile_l,marker='-',label=f'Norm Initial {params.P0/1e9} GW')
+        ax[1].plot(xax,(np.max(power[-1,:]))*params.profile_l,linestyle='-',label=f'Norm Initial {params.P0/1e9} GW')
         ax[1].plot(xax,(np.max(power[-1,:])/2)*params.profile_b,marker='.',label=f'Current Profile {params.I/1e3} kA')
-        ax[1].set_xlim(0,np.max(xax)*1.025)
+        ax[1].set_xlim([0,np.max(xax)*1.025])
         ax[1].set_xlabel('t [fs]')
         ax[1].set_ylabel('Power [W]')
         ax[1].set_title('Power as a function of time')
+        ax[1].legend()
 
         powerspec,omega = spectrum_calc(radfield[-1,:],params.lambda0,params.zsep)
+        xax = (omega+1)*params.hbar*2*np.pi*params.c/params.lambda0
+        ax[2].plot(xax,powerspec,color='b')
+        ax[2].set_xlim(min(xax),max(xax))
+        ax[2].set_yscale('log')
+        ax[2].set_xlabel('Photon Energy [eV]')
+        ax[2].set_ylabel('P (\omega) [arb. units]')
+        ax[2].set_title('Output Spectrum')
+        ax[2].legend()
 
     plt.show()
+    input('WAIT')
         
 
 
@@ -398,10 +408,10 @@ def oscLoop(npasses,Kz,res_phase): # Oscillator loop
     for i in np.linspace(0,npasses-1,npasses,dtype='int'):
         print(f'Loop {i+1} starting at {datetime.now().strftime("%d/%m/%Y %H:%M:%S")}.')
         start = time.time()
-        power,radfield = peraveCore(oldfield,firstpass,Kz,res_phase)
+        power,radfield,gammap,thetap = peraveCore(oldfield,firstpass,Kz,res_phase)
         end = time.time()
         print(f'Finished loop {i+1} in {end-start} seconds.\n')
-        peravePostprocessing(radfield,power)
+        peravePostprocessing(radfield,power,gammap,thetap)
         firstpass = False
     simEnd = time.time() # End time
     print(f'Finished simulation in {simEnd-simStart} seconds.\n')
