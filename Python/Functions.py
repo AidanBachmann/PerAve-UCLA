@@ -409,6 +409,15 @@ def peravePostprocessing(radfield,power,gammap,thetap,rho1D): # Postprocess data
         ax[2].set_ylabel(r'P($\omega$) [arb. units]')
         ax[2].set_title('Output Spectrum')
 
+    meanenergy = np.zeros([params.Nsnap])
+    for ij in np.linspace(0,params.Nsnap-1,params.Nsnap,dtype='int'):
+        meanenergy[ij] = sum(np.mean(gammap[ij,:,:],axis=2)*params.profile_b)/sum(params.profile_b)
+    
+    '''ax[3].plot([1:1:param.Nsnap]*param.stepsize,meanenergy)
+    xlabel('z')
+    ylabel('\gamma')
+    xlim([0,param.Nsnap*param.stepsize])'''
+
     plt.show()
     input('WAIT')
         
