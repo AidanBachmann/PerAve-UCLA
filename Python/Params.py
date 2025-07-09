@@ -36,7 +36,7 @@ psir = np.pi/6 # Phase
 
 ## Simulation control options
 phasespacemovie = int(0) # Create phase space movie
-itdp = int(0) # 1 for time-dependent simulation, 0 for time independent
+itdp = int(1) # 1 for time-dependent simulation, 0 for time independent
 prebunching = int(1) # Prebunching boolean, set to 1 to start from a pre-bunched beam
 changeresphase = int(0) # Update resonant phase
 saveoutput = int(0) # Save output bool

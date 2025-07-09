@@ -338,6 +338,10 @@ def oscLoop(npasses,Kz,res_phase): # Oscillator loop
     simStart = time.time() # Start time
     for i in np.linspace(0,npasses-1,npasses,dtype='int'):
         print(f'Loop {i+1} starting at {datetime.now().strftime("%d/%m/%Y %H:%M:%S")}.')
-        peraveCore(oldfield,firstpass,Kz,res_phase)
+        start = time.time()
+        power = peraveCore(oldfield,firstpass,Kz,res_phase)
+        end = time.time()
+        print(f'Finished loop {i+1} in {end-start} seconds.\n')
         firstpass = False
     simEnd = time.time() # End time
+    print(f'Finished simulation in {simEnd-simStart} seconds.\n')

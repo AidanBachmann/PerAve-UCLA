@@ -183,8 +183,6 @@ else
 end
 
 %% Remove slices within one total slippage length
-disp('Radfield before')
-disp(size(radfield))
 if(param.itdp)
 radfield(:,1:Nslip)=[];
 gammap(:,1:Nslip,:)=[];
@@ -193,7 +191,5 @@ profile_l(1:Nslip)=[];
 profile_b(1:Nslip)=[];
 bunch(:,1:Nslip)=[];
 end
-disp('Radfield after')
-disp(size(radfield))
 % Calculate radiation power 
 power(:,:) = abs(radfield(:,:)).^2/377*param.A_e;
