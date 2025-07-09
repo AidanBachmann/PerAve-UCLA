@@ -13,6 +13,7 @@ h=figure(4);
 set(h, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
 for n=1:param.Nsnap
 [powerspec,omega]=spectrum_calc((radfield(n,:)),param.lambda0,param.zsep);
+disp(omega)
 sidebandindex=omega>omegamin & omega<omegamax;
 fundspectrum=powerspec(sidebandindex);
 fundpower(n)=trapz(fundspectrum)/trapz(powerspec);
