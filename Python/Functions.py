@@ -425,7 +425,7 @@ def peravePostprocessing(radfield,power,gammap,thetap,rho1D): # Postprocess data
         ax[0].set_xlim([-20,20])
     
         ax[1].plot(xax,power[-1,:])
-        ax[1].set_xlim([0,max(xax)*1.025])
+        ax[1].set_xlim([0,xax[-1]])
         ax[1].set_xlabel('t [fs]')
         ax[1].set_ylabel('Output Radiation Power [W]')
 
@@ -439,7 +439,7 @@ def peravePostprocessing(radfield,power,gammap,thetap,rho1D): # Postprocess data
 
     ax[0].plot(zpos,np.mean(power,axis=1),color='b',label='Avg')
     ax[0].plot(zpos,np.max(power,axis=1),color='r',label='Max')
-    ax[0].set_xlim([0,zpos[-1]*1.025])
+    ax[0].set_xlim([0,zpos[-1]])
     ax[0].set_yscale('log')
     ax[0].set_xlabel('z Position')
     ax[0].set_ylabel('Power')
@@ -451,7 +451,7 @@ def peravePostprocessing(radfield,power,gammap,thetap,rho1D): # Postprocess data
         ax[1].plot(xax,power[-1,:],label='Final Power')
         ax[1].plot(xax,(np.max(power[-1,:]))*params.profile_l,linestyle='-',label=f'Norm Initial {params.P0/1e9} GW')
         ax[1].plot(xax,(np.max(power[-1,:])/2)*params.profile_b,marker='.',label=f'Current Profile {params.I/1e3} kA',markersize=10)
-        ax[1].set_xlim([0,np.max(xax)*1.025])
+        ax[1].set_xlim([0,xax[-1]])
         ax[1].set_xlabel('t [fs]')
         ax[1].set_ylabel('Power [W]')
         ax[1].set_title('Power as a function of time')
