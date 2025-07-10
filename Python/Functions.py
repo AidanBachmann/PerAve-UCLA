@@ -380,7 +380,7 @@ def fwhm(x,y): # ***** This can be replaced with one call of np.where
         Ptype = 2
         ttrail = None
         width = None
-        
+
     return width
 
 
@@ -466,8 +466,23 @@ def peravePostprocessing(radfield,power,gammap,thetap,rho1D): # Postprocess data
     ax[3].set_ylabel(r'$\gamma$')
     ax[3].set_xlim([0,params.Nsnap*1.025])
 
+    if(params.itdp == 1):
+        pulselength = fwhm(np.linspace(0,power.shape[1]-1,power.shape[1],dtype='int')*(params.zsep*params.lambda0*1e15)/3e8,np.convolve(power[-1,:],np.ones(15)/15,mode='same'))
+    else:
+        pulselength = params.sigma_t*2.35
+
+    # Energy calculations
+    Ebeam = meanenergy[0]*params.I*sum(params.profile_b)*(params.lambda0*params.zsep/params.c)*511000
+    Erad = (sum(power[-1,:]) - sum(power[0,:]))*params.lambda0*params.zsep/params.c
+    Eloss = (meanenergy[-1] - meanenergy[0])*params.I*sum(params.profile_b)*(params.lambda0*params.zsep/params.c)*511000
+    Efficiency = Erad/Ebeam
+    Econservation = ((meanenergy[-1] - meanenergy[0])*params.I*sum(params.profile_b)*(params.lambda0*params.zsep/params.c)*511000 + Erad)/Ebeam
+
     plt.show()
     input('WAIT')
+
+    if params.phasespacemovie: # ***** Phase space gif code here
+        pass
         
 
 def oscLoop(npasses,Kz,res_phase,rho1D): # Oscillator loop
