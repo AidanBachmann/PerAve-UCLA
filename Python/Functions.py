@@ -346,6 +346,44 @@ def spectrum_calc(field,xlamds,zsep): # Compute spectrum
     omega -= 1
     return power_spectrum,omega
 
+def fwhm(x,y): # ***** This can be replaced with one call of np.where
+    # Full-Width at Half-Maximum (FWHM) of the waveform y(x)
+    # and its polarity.
+    # The FWHM result in 'width' will be in units of 'x'
+    #
+    #
+    # Rev 1.2, April 2006 (Patrick Egan)
+
+    y /= np.max(y)
+    N = len(y)
+    lev50 = 0.5
+    if y[0] < lev50: # Find index of center (max or min) of pulse
+        [garbage,centerindex] = max(y) # Positive pulse polarity
+        Pol = +1
+    else: # Negative pulse polarity
+        [garbage,centerindex] = min(y)
+        Pol = -1
+    i = 1
+    while np.sign(y[i]-lev50) == np.sign(y[i-1]-lev50): # First crossing is between v(i-1) & v(i)
+        i += 1
+    interp = (lev50 - y[i-1])/(y[i] - y[i-1])
+    tlead = x[i-1] + interp*(x[i] - x[i-1])
+    i = centerindex + 1
+    while ((np.sign(y[i] - lev50) == np.sign(y[i-1] - lev50)) and (i <= N-1)): # Start search for next crossing at center
+        i += 1
+    if i != N: # Pulse is Impulse or Rectangular with 2 edges
+        Ptype = 1 
+        interp = (lev50-y[i-1]) / (y[i]-y[i-1])
+        ttrail = x[i-1] + interp*(x[i]-x[i-1])
+        width = ttrail - tlead
+    else: # Step-Like Pulse, no second edge
+        Ptype = 2
+        ttrail = None
+        width = None
+        
+    return width
+
+
 def peravePostprocessing(radfield,power,gammap,thetap,rho1D): # Postprocess data from core
     kw = 2*np.pi/params.lambdau
     zpos = np.linspace(0,params.Nsnap-1,params.Nsnap,dtype='int')*params.stepsize # ***** Matlab 1 indexing means that Matlab version runs over np.linspace(1,params.Nsnap,params.Nsnap,dtype='int')
@@ -431,7 +469,6 @@ def peravePostprocessing(radfield,power,gammap,thetap,rho1D): # Postprocess data
     plt.show()
     input('WAIT')
         
-
 
 def oscLoop(npasses,Kz,res_phase,rho1D): # Oscillator loop
     firstpass = True # Flag to indicate first pass of oscillator
