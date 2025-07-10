@@ -34,6 +34,7 @@ if params.tapering != int(0):
     bucket_params = funcs.bucket_parameters()
     # *** Insert code for other parameters here ***
 Lgain3D = funcs.correction3D(Lgain) # Compute 3D correction to Lgain
+funcs.printParams(Lgain3D)
 
 # *** 3D correction to Lgain goes here ***
 

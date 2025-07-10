@@ -13,6 +13,14 @@ import Params as params
 
 # ---------- Function Definition ----------
 
+def printParams(Lgain3D): # Print parameters to terminal (unfortunately, hardcoded)
+    print(f'sigma_t: {params.sigma_t}\nuse3DCorrection: {params.use3Dcorrection}\nbeamdistribution: {params.beamdistribution}\nlaserdistribution: {params.laserdistribution}')
+    print(f'lambdau: {params.lambdau}\nK: {params.K}\nku: {params.ku}\ntapering: {params.tapering}\nz0: {params.z0}\npsir: {params.psir}\nphasespacemovie: {params.phasespacemovie}')
+    print(f'itdp: {params.itdp}\nprebunching: {params.prebunching}\nchangeresphase: {params.changeresphase}\ndelz: {params.delz}\nund_periods: {params.und_periods}')
+    print(f'Nsnap: {params.Nsnap}\nzsep: {params.zsep}\nshotnoise: {params.shotnoise}\nlambda0: {params.lambda0}\nk: {params.k}\nnslices: {params.nslices}')
+    print(f'stepsize: {params.stepsize}\ngamma0: {params.gamma0}\nNp: {params.Np}\nEe: {params.Ee}\ndeltagammarel: {params.deltagammarel}\ndeltagamma: {params.deltagamma}')
+    print(f'bunch: {params.bunch}\nbunchphase: {params.bunchphase}\nbuncherAmp: {params.buncherAmp}\nI: {params.I}\nLgain3D: {Lgain3D}\n')
+
 def computeUndulatorField(res_phase,Kz): # Compute undulator field, I guess
     if params.tapering != 0: # Check if using tapering
         startindex = max(0,math.floor(params.z0/params.stepsize)) # Discretized initial position 
@@ -413,10 +421,11 @@ def peravePostprocessing(radfield,power,gammap,thetap,rho1D): # Postprocess data
     for ij in np.linspace(0,params.Nsnap-1,params.Nsnap,dtype='int'):
         meanenergy[ij] = sum(np.mean(gammap[ij,:,:],axis=2)*params.profile_b)/sum(params.profile_b)
     
-    '''ax[3].plot([1:1:param.Nsnap]*param.stepsize,meanenergy)
-    xlabel('z')
-    ylabel('\gamma')
-    xlim([0,param.Nsnap*param.stepsize])'''
+    xax = params.stepsize*np.linspace(0,params.Nsnap-1,params.Nsnap,dtype='int')
+    ax[3].plot(xax,meanenergy)
+    ax[3].set_xlabel('z')
+    ax[3].set_ylabel(r'$\gamma$')
+    ax[3].set_xlim([0,params.Nsnap*1.025])
 
     plt.show()
     input('WAIT')
