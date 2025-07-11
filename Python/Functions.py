@@ -341,7 +341,7 @@ def peraveCore(oldfield,firstpass,Kz,res_phase): # Push particle
     print('Finished solving eqs.')
 
     # Calculate radiation power 
-    power = np.power(np.abs(radfield),2)/(params.Z0*params.A_e)
+    power = (np.power(np.abs(radfield),2)/params.Z0)*params.A_e
 
     return power,radfield,gammap,thetap,profile_l,profile_b
 
