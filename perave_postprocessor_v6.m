@@ -112,8 +112,6 @@ if param.itdp
     contour(power)  
 end
 
-input('WAIT')
-
 %% Energy calculations 
 if(param.itdp)
     pulselength = fwhm([1:size(power,2)]*param.zsep*param.lambda0*1e15/3e8,smooth(power(end,:),15))

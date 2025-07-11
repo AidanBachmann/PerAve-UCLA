@@ -2,6 +2,9 @@
 %%%%User entered parameters%%%%%
 %% from Duris et al. TESSO paper 
 
+% Set random number generator seed
+rng(3141592653)
+
 %% Undulator parameters
 param.lambdau = 3.14e-2;                                 % undulator period (m)
 param.K = 1.934; %e0*Bfield*/me/c/ku;               % RMS undulator parameter

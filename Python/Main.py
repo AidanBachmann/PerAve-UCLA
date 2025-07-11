@@ -13,6 +13,8 @@ import time
 # Note: res_phase and Kz are numpy arrays (which are objects) so, by default, Python passes by reference. As a result,
 # we don't need any return statements on functions such as computeUndulatorField.
 
+np.random.seed(3141592653) # Set random number generator seed
+
 ## Flags
 plotFilter = False # Set to true to plot filter function
 npasses = int(1) # Number of passes through oscillator

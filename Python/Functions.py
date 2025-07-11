@@ -197,7 +197,7 @@ def push_FEL_particles_RK4(phasespace,evalue,kvalue,chi1):
 def bukh(phi):
     return np.sqrt(np.cos(phi)-(np.pi/2-phi)*np.sin(phi))
 
-#@jit(nopython = True)
+@jit(nopython = True)
 def peraveCore(oldfield,firstpass,Kz,res_phase): # Push particle
     Np = params.Np # Grab number of particles
     nbins = 32 # Binning for particles?
@@ -305,17 +305,10 @@ def peraveCore(oldfield,firstpass,Kz,res_phase): # Push particle
         profile_l = profile_l[params.Nslip:]
         profile_b = profile_b[params.Nslip:]
         bunch = bunch[:,params.Nslip:]
-        
-        '''radfield[:,0:params.Nslip-1] = [] # Fix later
-        gammap[:,0:params.Nslip-1,:] = []
-        thetap[:,0:params.Nslip-1,:] = []
-        params.profile_l[0:params.Nslip-1] = []
-        params.profile_b[0:params.Nslip-1] = []
-        bunch[:,0:params.Nslip-1] = []'''
     else: # Time independent simulation
         deltagammamax = 1
         for ij in np.linspace(0,params.Nsnap-2,params.Nsnap-1).astype('int'):  # Takes Nsnap snapshots along length of undulator
-            gammaf = gammap[ij,0,:]
+            gammaf = gammap[ij,0,:] # Format: (Nsnap,nslices,Np)
             thetaf = thetap[ij,0,:]
             E_q0 = radfield[ij,0]
             
@@ -484,10 +477,7 @@ def peravePostprocessing(radfield,power,gammap,thetap,rho1D,profile_l,profile_b)
     ax[3].set_ylabel(r'$\gamma$')
     ax[3].set_xlim([0,max(zpos)])
 
-    print(zpos[-1],meanenergy[-1])
-
     plt.show()
-    input('WAIT')
 
     if(params.itdp == 1):
         pulselength = fwhm(np.linspace(0,power.shape[1]-1,power.shape[1],dtype='int')*(params.zsep*params.lambda0*1e15)/3e8,np.convolve(power[-1,:],np.ones(15)/15,mode='same'))
@@ -504,7 +494,6 @@ def peravePostprocessing(radfield,power,gammap,thetap,rho1D,profile_l,profile_b)
     if params.phasespacemovie == 1: # ***** Phase space gif code here
         pass
         
-    input('WAIT')
 
 def oscLoop(npasses,Kz,res_phase,rho1D): # Oscillator loop
     firstpass = True # Flag to indicate first pass of oscillator
