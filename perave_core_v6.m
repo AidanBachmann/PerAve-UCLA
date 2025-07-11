@@ -167,7 +167,7 @@ else
             bunch(ij)=(mean(exp(1j.*thetap(ij,1,:)),3));
             
       % Particle detrap when deltagamma decreases
-            if (ij>40000 & param.changeresphase)  
+            if (ij>40000 & param.changeresphase)
                 bukh = @(phi) sqrt(cos(phi)-(pi/2-phi)*sin(phi));
                 deltagamma = sqrt(Kz(ij+1).*mean(abs(radfield(ij,:)),2))*bukh(res_phase(ij));
                 deltagammamax = max(deltagammamax,deltagamma);

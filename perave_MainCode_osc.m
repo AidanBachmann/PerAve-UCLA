@@ -83,7 +83,7 @@ tapering_strength = 2;   % 0 max of slices at time 0
     hold off
 
  %% Oscillator loop
-for npasses = 1:100
+for npasses = 1:1
     clear power radfield thetap gammap bunch
     t0 = tic;
     perave_core_v6;

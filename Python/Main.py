@@ -15,7 +15,7 @@ import time
 
 ## Flags
 plotFilter = False # Set to true to plot filter function
-npasses = int(100) # Number of passes through oscillator
+npasses = int(1) # Number of passes through oscillator
 
 ## Arrays to store tapering of params
 

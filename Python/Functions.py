@@ -197,7 +197,7 @@ def push_FEL_particles_RK4(phasespace,evalue,kvalue,chi1):
 def bukh(phi):
     return np.sqrt(np.cos(phi)-(np.pi/2-phi)*np.sin(phi))
 
-@jit(nopython = True)
+#@jit(nopython = True)
 def peraveCore(oldfield,firstpass,Kz,res_phase): # Push particle
     Np = params.Np # Grab number of particles
     nbins = 32 # Binning for particles?
@@ -243,6 +243,7 @@ def peraveCore(oldfield,firstpass,Kz,res_phase): # Push particle
                 gammap[0,islice,ipart] = gammab[ipart]
 
         bunching[islice] = np.sum(np.exp(1j*thetap[0,islice,:])/Np)
+
     
     print(f'Finished init.')
 
@@ -321,7 +322,7 @@ def peraveCore(oldfield,firstpass,Kz,res_phase): # Push particle
             # RK4th order integration     
             phasespaceold = np.vstack((thetaf,gammaf)).T
             evaluesold = E_q0
-            phasespacenew,evaluesnew = push_FEL_particles_RK4(phasespaceold,evaluesold,Kz[ij],chi1)     
+            phasespacenew,evaluesnew = push_FEL_particles_RK4(phasespaceold,evaluesold,Kz[ij],params.chi1)     
             thetap[ij+1,0,:] = phasespacenew[:,0]
             gammap[ij+1,0,:] = phasespacenew[:,1]
             radfield[ij+1,0] = evaluesnew
@@ -346,14 +347,21 @@ def peraveCore(oldfield,firstpass,Kz,res_phase): # Push particle
     return power,radfield,gammap,thetap,profile_l,profile_b
 
 def spectrum_calc(field,xlamds,zsep): # Compute spectrum
-    omegas = (2*np.pi*params.c)/xlamds
+    omegas = (2*np.pi*params.c)/xlamds # Seed frequency
+    print(f'OMEGAS = {omegas}')
     df = (2*np.pi*params.c)/(params.nslices*zsep*xlamds)
     ft = scipy.fft.fftshift(scipy.fft.fft(field))
     omega = df*np.linspace(1,len(ft),len(ft),dtype='int')
+    print('OMEGA:')
+    print(omega)
     omega -= np.median(omega) + omegas
+    print(omega)
     omega /= omegas
+    print(omega)
     power_spectrum = np.power(abs(ft),2)
     omega -= 1
+    print(omega)
+    input('WAIT')
     return power_spectrum,omega
 
 def fwhm(x,y): # ***** This can be replaced with one call of np.where
@@ -394,14 +402,14 @@ def fwhm(x,y): # ***** This can be replaced with one call of np.where
     return width
 
 
-def peravePostprocessing(radfield,power,gammap,thetap,rho1D): # Postprocess data from core
+def peravePostprocessing(radfield,power,gammap,thetap,rho1D,profile_l,profile_b): # Postprocess data from core
     kw = 2*np.pi/params.lambdau
     zpos = np.linspace(0,params.Nsnap-1,params.Nsnap,dtype='int')*params.stepsize # ***** Matlab 1 indexing means that Matlab version runs over np.linspace(1,params.Nsnap,params.Nsnap,dtype='int')
 
     ## Spectrum as a function of z
     fundpower = np.zeros([params.Nsnap]) # Power
     sidebandpower = np.zeros([params.Nsnap])
-    if params.itdp == 1:
+    if params.itdp == 1: # ***** Uncomment
         omegamin = -10e-4
         omegamax = 10e-4
         fig,ax = plt.subplots(nrows=1,ncols=2,figsize=(16,9))
@@ -449,8 +457,8 @@ def peravePostprocessing(radfield,power,gammap,thetap,rho1D): # Postprocess data
     if params.itdp == 1:
         xax = (params.zsep*params.lambda0*1e15/params.c)*np.linspace(0,power.shape[1]-1,power.shape[1],dtype='int')
         ax[1].plot(xax,power[-1,:],label='Final Power')
-        ax[1].plot(xax,(np.max(power[-1,:]))*params.profile_l,linestyle='-',label=f'Norm Initial {params.P0/1e9} GW')
-        ax[1].plot(xax,(np.max(power[-1,:])/2)*params.profile_b,marker='.',label=f'Current Profile {params.I/1e3} kA',markersize=10)
+        ax[1].plot(xax,(np.max(power[-1,:]))*profile_l,linestyle='-',label=f'Norm Initial {params.P0/1e9} GW')
+        ax[1].plot(xax,(np.max(power[-1,:])/2)*profile_b,marker='.',label=f'Current Profile {params.I/1e3} kA',markersize=10)
         ax[1].set_xlim([0,xax[-1]])
         ax[1].set_xlabel('t [fs]')
         ax[1].set_ylabel('Power [W]')
@@ -468,13 +476,15 @@ def peravePostprocessing(radfield,power,gammap,thetap,rho1D): # Postprocess data
 
     meanenergy = np.zeros([params.Nsnap])
     for ij in np.linspace(0,params.Nsnap-1,params.Nsnap,dtype='int'):
-        meanenergy[ij] = sum(np.mean(gammap[ij,:,:],axis=1)*params.profile_b)/sum(params.profile_b)
+        meanenergy[ij] = sum(np.mean(gammap[ij,:,:],axis=1)*profile_b)/sum(profile_b)
     
     #xax = params.stepsize*np.linspace(0,params.Nsnap-1,params.Nsnap,dtype='int')
     ax[3].plot(zpos,meanenergy)
     ax[3].set_xlabel('z')
     ax[3].set_ylabel(r'$\gamma$')
     ax[3].set_xlim([0,max(zpos)])
+
+    print(zpos[-1],meanenergy[-1])
 
     plt.show()
     input('WAIT')
@@ -485,11 +495,11 @@ def peravePostprocessing(radfield,power,gammap,thetap,rho1D): # Postprocess data
         pulselength = params.sigma_t*2.35
 
     # Energy calculations
-    Ebeam = meanenergy[0]*params.I*sum(params.profile_b)*(params.lambda0*params.zsep/params.c)*511000
+    Ebeam = meanenergy[0]*params.I*sum(profile_b)*(params.lambda0*params.zsep/params.c)*511000
     Erad = (sum(power[-1,:]) - sum(power[0,:]))*params.lambda0*params.zsep/params.c
-    Eloss = (meanenergy[-1] - meanenergy[0])*params.I*sum(params.profile_b)*(params.lambda0*params.zsep/params.c)*511000
+    Eloss = (meanenergy[-1] - meanenergy[0])*params.I*sum(profile_b)*(params.lambda0*params.zsep/params.c)*511000
     Efficiency = Erad/Ebeam
-    Econservation = ((meanenergy[-1] - meanenergy[0])*params.I*sum(params.profile_b)*(params.lambda0*params.zsep/params.c)*511000 + Erad)/Ebeam
+    Econservation = ((meanenergy[-1] - meanenergy[0])*params.I*sum(profile_b)*(params.lambda0*params.zsep/params.c)*511000 + Erad)/Ebeam
 
     if params.phasespacemovie == 1: # ***** Phase space gif code here
         pass
@@ -507,11 +517,9 @@ def oscLoop(npasses,Kz,res_phase,rho1D): # Oscillator loop
         print(f'Loop {i+1} starting at {datetime.now().strftime("%d/%m/%Y %H:%M:%S")}.')
         start = time.time()
         power,radfield,gammap,thetap,profile_l,profile_b = peraveCore(oldfield,firstpass,Kz,res_phase)
-        params.profile_l = profile_l # Remove 
-        params.profile_b = profile_b
         end = time.time()
         print(f'Finished loop {i+1} in {end-start} seconds.\n')
-        peravePostprocessing(radfield,power,gammap,thetap,rho1D)
+        peravePostprocessing(radfield,power,gammap,thetap,rho1D,profile_l,profile_b)
         firstpass = False
     simEnd = time.time() # End time
     print(f'Finished simulation in {simEnd-simStart} seconds.\n')

@@ -37,7 +37,7 @@ psir = np.pi/6 # Phase
 
 ## Simulation control options
 phasespacemovie = int(0) # Create phase space movie
-itdp = int(1) # 1 for time-dependent simulation, 0 for time independent
+itdp = int(0) # 1 for time-dependent simulation, 0 for time independent
 prebunching = int(1) # Prebunching boolean, set to 1 to start from a pre-bunched beam
 changeresphase = int(0) # Update resonant phase
 saveoutput = int(0) # Save output bool
@@ -67,7 +67,7 @@ Ee = (gamma0*me*pow(c,2))/e0 # Total e-beam energy, gamma*m*c^2 (eV)
 energyspread = 1*20e-15/sigma_t # Absolute energy spread (MeV)
 deltagammarel = energyspread/(gamma0*0.511) # Relative energy spread, dgamma/gamma
 deltagamma = gamma0*deltagammarel
-bunch = 0.7 # Initial bunching factor
+bunch = 0.000001 # Initial bunching factor
 bunchphase = -psir-np.pi/2 # Initial bunching phase
 buncherAmp = 5 # ***** Not sure
 
@@ -84,7 +84,7 @@ A_e = 2*np.pi*pow(sigmax,2) # Beam cross section
 Simulation_temporal_window = nslices*zsep*(lambda0/c)
 
 ## Radiation parameters
-P0 = 30e9 # Peak input power (W)
+P0 = 10 # Peak input power (W)
 A_mode = A_e # 1D code, area is same for e_beam and radiation
 waist = np.sqrt((2*A_mode)/np.pi) # Waist size
 zr = (np.pi*pow(waist,2))/lambda0 # Rayleigh length of seed (m)
