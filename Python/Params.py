@@ -84,7 +84,7 @@ A_e = 2*np.pi*pow(sigmax,2) # Beam cross section
 Simulation_temporal_window = nslices*zsep*(lambda0/c)
 
 ## Radiation parameters
-P0 = 10 # Peak input power (W)
+P0 = 1e3 # Peak input power (W)
 A_mode = A_e # 1D code, area is same for e_beam and radiation
 waist = np.sqrt((2*A_mode)/np.pi) # Waist size
 zr = (np.pi*pow(waist,2))/lambda0 # Rayleigh length of seed (m)

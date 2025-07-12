@@ -197,7 +197,7 @@ def push_FEL_particles_RK4(phasespace,evalue,kvalue,chi1):
 def bukh(phi):
     return np.sqrt(np.cos(phi)-(np.pi/2-phi)*np.sin(phi))
 
-@jit(nopython = True)
+#@jit(nopython = True)
 def peraveCore(oldfield,firstpass,Kz,res_phase): # Push particle
     Np = params.Np # Grab number of particles
     nbins = 32 # Binning for particles?
@@ -394,6 +394,13 @@ def fwhm(x,y): # ***** This can be replaced with one call of np.where
 
     return width
 
+def fitExp(power,zpos): # Fit power in exponential gain regime to compute gain length
+    idx = np.where(power == max(power))[0][0] # Find index of max power, use to truncate fit
+    idxPad = int(params.Nsnap*0.125) # Curve is not linear near max, use to to fit ending at some index away from the max
+    upperIdx = idx - idxPad
+    lowerIdx = int(idxPad*1.75)
+    slope,intercept = np.polyfit(zpos[lowerIdx:upperIdx],power[lowerIdx:upperIdx],deg=1)
+    return slope,intercept,upperIdx,lowerIdx
 
 def peravePostprocessing(radfield,power,gammap,thetap,rho1D,profile_l,profile_b): # Postprocess data from core
     kw = 2*np.pi/params.lambdau
@@ -438,13 +445,21 @@ def peravePostprocessing(radfield,power,gammap,thetap,rho1D,profile_l,profile_b)
     ax = ax.flatten()
     fig.suptitle('Simulation Output')
 
-    ax[0].plot(zpos,np.mean(power,axis=1),color='b',label='Avg')
+    avgPower = np.mean(power,axis=1) # Compute average power
+    slope,intercept,maxIdx,minIdx = fitExp(np.log10(avgPower),zpos) # Linear fit to power in exponential regime
+    fit = pow(10,zpos*slope+intercept) # Compute fit
+
+    ax[0].plot(zpos,avgPower,color='b',label='Avg')
     ax[0].plot(zpos,np.max(power,axis=1),color='r',label='Max')
+    ax[0].plot(zpos,fit,color='g',linestyle='dashed',label=f'Average Fit, slope = {round(slope,3)}')
+    ax[0].vlines([zpos[minIdx],zpos[maxIdx]],np.min(fit)*(.01),np.max(fit)*(100),linestyles='dashed',color='black',label='Fiting Region')
     ax[0].set_xlim([0,zpos[-1]])
+    ax[0].set_ylim([np.min(fit)*0.75,np.max(fit)*1.25])
     ax[0].set_yscale('log')
-    ax[0].set_xlabel('z Position')
+    ax[0].set_xlabel('z')
     ax[0].set_ylabel('Power')
     ax[0].set_title('Radiation Power along the beam')
+    ax[0].grid()
     ax[0].legend()
 
     if params.itdp == 1:
@@ -456,6 +471,7 @@ def peravePostprocessing(radfield,power,gammap,thetap,rho1D,profile_l,profile_b)
         ax[1].set_xlabel('t [fs]')
         ax[1].set_ylabel('Power [W]')
         ax[1].set_title('Power as a function of time')
+        ax[1].grid()
         ax[1].legend()
 
         powerspec,omega = spectrum_calc(radfield[-1,:],params.lambda0,params.zsep)
@@ -465,6 +481,7 @@ def peravePostprocessing(radfield,power,gammap,thetap,rho1D,profile_l,profile_b)
         ax[2].set_yscale('log')
         ax[2].set_xlabel('Photon Energy [eV]')
         ax[2].set_ylabel(r'P($\omega$) [arb. units]')
+        ax[2].grid()
         ax[2].set_title('Output Spectrum')
 
     meanenergy = np.zeros([params.Nsnap])
@@ -476,6 +493,7 @@ def peravePostprocessing(radfield,power,gammap,thetap,rho1D,profile_l,profile_b)
     ax[3].set_xlabel('z')
     ax[3].set_ylabel(r'$\gamma$')
     ax[3].set_xlim([0,max(zpos)])
+    ax[3].grid()
 
     plt.show()
 
