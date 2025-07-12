@@ -28,10 +28,9 @@ funcs.computeUndulatorField(res_phase,Kz) # Compute undulator field
 
 ## FEL Parameters
 
-rho1D = (1/params.gamma0)*pow( (1/8)*(params.I/params.IA)*(pow(params.K,2)/(pow(params.sigmax*params.ku,2))),(1/3))
-Lgain = params.lambdau/(4*np.sqrt(3)*np.pi*rho1D)
-Lsat =   params.lambdau/rho1D
-Psat = 1.6*rho1D*params.Ee*params.I
+Lgain = params.lambdau/(4*np.sqrt(3)*np.pi*params.rho1D)
+Lsat =   params.lambdau/params.rho1D
+Psat = 1.6*params.rho1D*params.Ee*params.I
 if params.tapering != int(0):
     bucket_params = funcs.bucket_parameters()
     # *** Insert code for other parameters here ***
@@ -48,4 +47,4 @@ sigma_omega = 0.003*params.nslices*params.zsep # Filter fractional bandwidth
 
 filter3 = funcs.filter(sigma_omega,plotFilter) # Compute filter
 
-funcs.oscLoop(npasses,Kz,res_phase,rho1D) # Oscillator loop
+funcs.oscLoop(npasses,Kz,res_phase) # Oscillator loop

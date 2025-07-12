@@ -402,7 +402,7 @@ def fitExp(power,zpos): # Fit power in exponential gain regime to compute gain l
     slope,intercept = np.polyfit(zpos[lowerIdx:upperIdx],power[lowerIdx:upperIdx],deg=1)
     return slope,intercept,upperIdx,lowerIdx
 
-def peravePostprocessing(radfield,power,gammap,thetap,rho1D,profile_l,profile_b): # Postprocess data from core
+def peravePostprocessing(radfield,power,gammap,thetap,profile_l,profile_b): # Postprocess data from core
     kw = 2*np.pi/params.lambdau
     zpos = np.linspace(0,params.Nsnap-1,params.Nsnap,dtype='int')*params.stepsize # ***** Matlab 1 indexing means that Matlab version runs over np.linspace(1,params.Nsnap,params.Nsnap,dtype='int')
 
@@ -426,7 +426,7 @@ def peravePostprocessing(radfield,power,gammap,thetap,rho1D,profile_l,profile_b)
             except:
                 pass
         
-        ax[0].plot(omega/rho1D,abs(powerspec))
+        ax[0].plot(omega/params.rho1D,abs(powerspec))
         ax[0].set_xlabel(r'$\frac{\delta\omega}{\rho\omega}$')
         ax[0].set_ylabel(r'P($\omega$) [arb. units]')    
         ax[0].set_yscale('log')
@@ -513,7 +513,7 @@ def peravePostprocessing(radfield,power,gammap,thetap,rho1D,profile_l,profile_b)
         pass
         
 
-def oscLoop(npasses,Kz,res_phase,rho1D): # Oscillator loop
+def oscLoop(npasses,Kz,res_phase): # Oscillator loop
     firstpass = True # Flag to indicate first pass of oscillator
     print(f'\nStarting oscillator simulation at {datetime.now().strftime("%d/%m/%Y %H:%M:%S")}.\n')
 
@@ -526,7 +526,7 @@ def oscLoop(npasses,Kz,res_phase,rho1D): # Oscillator loop
         power,radfield,gammap,thetap,profile_l,profile_b = peraveCore(oldfield,firstpass,Kz,res_phase)
         end = time.time()
         print(f'Finished loop {i+1} in {end-start} seconds.\n')
-        peravePostprocessing(radfield,power,gammap,thetap,rho1D,profile_l,profile_b)
+        peravePostprocessing(radfield,power,gammap,thetap,profile_l,profile_b)
         firstpass = False
     simEnd = time.time() # End time
     print(f'Finished simulation in {simEnd-simStart} seconds.\n')
