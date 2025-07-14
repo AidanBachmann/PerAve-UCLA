@@ -37,7 +37,8 @@ if params.tapering != int(0):
 Lgain3D = funcs.correction3D(Lgain) # Compute 3D correction to Lgain
 funcs.printParams(Lgain3D)
 
-# *** 3D correction to Lgain goes here ***
+print(f'rho = {params.rho}\ndelta = {params.delta}')
+input('WAIT')
 
 ## Run the main integration routine
 

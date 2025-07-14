@@ -66,7 +66,7 @@ param.A_e = 2*pi*param.sigmax^2;                          % beam cross section
 Simulation_temporal_window=param.nslices*param.zsep*param.lambda0/c;
 
 %% radiation parameters
-P0 = 10; param.P0=P0;                                               % Peak input power (W) 
+P0 = 1e3; param.P0=P0;                                               % Peak input power (W) 
 A_mode = param.A_e;                                                     % 1D code. area is same for e_beam and radiation
 param.waist = sqrt(A_mode*2/pi);
 zr = pi*param.waist^2/param.lambda0;                          % Rayleigh length of seed (m)
@@ -77,3 +77,10 @@ param.sigma_l = 2400e-15;
 %% Simplifying constants
 param.chi2 = e0/me/c^2;
 param.chi1=mu0*c/2*param.I/param.A_e;
+
+%% Parameters for exponential gain regime
+
+%param.gammar = sqrt( param.k*(1 + param.K.^2)/(2*param.ku) ); % Resonant energy
+%param.omegap = sqrt( (4*pi*rho1D*e0.^2)/(4*pow(param.gammar,2)*param.omega0) ); % Plasma frequency
+%param.rho = ((param.K*param.gamma0*param.omegap)/(4*param.gammar.^2*param.omega0)).^(2/3); % FEL parameter
+%param.delta = (param.gamma0.^2 - param.gammar.^2)/(2*(param.gammar.^2)*param.rho); % Delta parameter

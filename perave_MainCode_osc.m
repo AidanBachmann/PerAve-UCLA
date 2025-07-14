@@ -135,5 +135,8 @@ figure(103)
 plot(Eff)
 
 figure(300)
-contourf([1:size(rad_vs_beam,1)]*param.zsep*param.lambda0/c,[1:1],rad_vs_beam')
-
+try
+    contourf([1:size(rad_vs_beam,1)]*param.zsep*param.lambda0/c,[1:1],rad_vs_beam');
+catch
+    disp('Error using contourf, argument must be at least 2x2.')
+end

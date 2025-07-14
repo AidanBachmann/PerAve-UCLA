@@ -53,7 +53,7 @@ semilogy(zpos,max(power'),color='r')
 xline([zpos(lowerIdx) zpos(upperIdx)],'--',color='black')
 xlim([0,zpos(end)])
 title('Radiation Power along the beam')
-legend('Avg',strcat('Fit, slope =  ',num2str(coeff(1))),'Max','Fitting Region')
+legend('Avg','Fit, slope = '+str,'Max','Fitting Region')
 
 if param.itdp
 subplot(2,3,2)
