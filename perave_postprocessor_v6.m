@@ -54,7 +54,7 @@ xline([zpos(lowerIdx) zpos(upperIdx)],'--',color='black');
 xlim([0,zpos(end)]);
 title('Radiation Power along the beam');
 legend('Avg',strcat('Fit, slope =  ',num2str(coeff(1))),'Max','Fitting Region');
-fprintf('\nTheoretical gain length: %f\nNumerically Computed Gain Length: %f\nNormalized Error: %f\n',param.lambda,coeff(1),abs(coeff(1) - param.lambda)/param.lambda);
+fprintf('\nTheoretical Gain Length: %f\nNumerically Computed Gain Length: %f\nNormalized Error: %f\n',param.lambda,coeff(1),abs(coeff(1) - param.lambda)/param.lambda);
 
 if param.itdp
 subplot(2,3,2)

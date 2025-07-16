@@ -398,9 +398,17 @@ def fitExp(power,zpos): # Fit power in exponential gain regime to compute gain l
     idx = np.where(power == max(power))[0][0] # Find index of max power, use to truncate fit
     idxPad = int(params.Nsnap*0.125) # Curve is not linear near max, use to to fit ending at some index away from the max
     upperIdx = idx - idxPad
-    lowerIdx = int(idxPad*1.75)
+    lowerIdx = int(idxPad*2)
     slope,intercept = np.polyfit(zpos[lowerIdx:upperIdx],power[lowerIdx:upperIdx],deg=1)
     return slope,intercept,upperIdx,lowerIdx
+
+def findRoots(): # Solve cubic equation to find theoretical value of exponential gain length
+    a = 1 # Coefficients of the cubic polynomial of the form a*lambda^3 + b*lambda^2 + c*lambda + d
+    b = (pow(params.sigma,2))/2 - params.delta
+    c = 2*params.rho - (pow(params.sigma,2))/params.rho
+    d = params.delta*((pow(params.sigma,2))/params.rho) - (pow(params.sigma,4))/(2*params.rho) + params.rho*(pow(params.sigma,2)) + 1
+    rts = np.imag(np.roots(np.asarray([a,b,c,d]))) # Compute roots, take imaginary part
+    return abs(min(rts)) # Find negative root corresponding to exponential growth, take the norm
 
 def peravePostprocessing(radfield,power,gammap,thetap,profile_l,profile_b): # Postprocess data from core
     kw = 2*np.pi/params.lambdau
@@ -448,6 +456,9 @@ def peravePostprocessing(radfield,power,gammap,thetap,profile_l,profile_b): # Po
     avgPower = np.mean(power,axis=1) # Compute average power
     slope,intercept,maxIdx,minIdx = fitExp(np.log10(avgPower),zpos) # Linear fit to power in exponential regime
     fit = pow(10,zpos*slope+intercept) # Compute fit
+    lmbda = findRoots() # Compute theoretical gain length
+    err = abs(slope - lmbda)/lmbda # Normalized error of numerical gain length
+    print(f'Theoretical Gain Length: {lmbda}\nNumerically Computed Gain Length: {slope}\nNormalized Error: {err}\n')
 
     ax[0].plot(zpos,avgPower,color='b',label='Avg')
     ax[0].plot(zpos,np.max(power,axis=1),color='r',label='Max')
