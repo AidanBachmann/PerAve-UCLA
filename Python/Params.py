@@ -50,7 +50,6 @@ Nslip = round(Nsnap/zsep) # ***** Not sure
 shotnoise = 1 # ***** Not sure
 lambda0 = 13.5e-9 # Seed wavelength (m)
 k = (2*np.pi)/lambda0 # Wavenumber in free space
-omega0 = c*k # Frequency of seed field
 nslices = 4*Nslip + 4*round((sigma_t/(zsep*lambda0))*c) # ***** Not sure
 
 if itdp == 0:
@@ -118,12 +117,13 @@ else:
     profile_l = np.zeros([nslices])
     profile_l[abs(tslice-slippage*np.ones([nslices]))<sigma_l] = 1
 
-rho1D = (1/gamma0)*pow( (1/8)*(I/IA)*(pow(K,2)/(pow(sigmax*ku,2))),(1/3)) # Electron density
-
 
 ## Parameters for exponential gain regime
 
+omega0 = c*ku # Undulator frequency
+rho1D = (1/gamma0)*pow( (1/8)*(I/IA)*(pow(K,2)/(pow(sigmax*ku,2))),(1/3)) # Electron density
 gammar = np.sqrt( k*(1 + pow(K,2))/(2*ku) ) # Resonant energy
 omegap = np.sqrt( 4*np.pi*rho1D*pow(e0,2)/(4*pow(gammar,2)*omega0) ) # Plasma frequency
 rho = pow((K*gamma0*omegap)/(4*pow(gammar,2)*omega0),2/3) # FEL parameter
+sigmarho = (4*pow(rho,2))*(1+pow(K,2))/pow(K,2) # Sigma parameter
 delta = (pow(gamma0,2) - pow(gammar,2))/(2*pow(gammar,2)*rho) # Delta parameter
