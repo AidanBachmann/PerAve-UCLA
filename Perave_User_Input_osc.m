@@ -85,5 +85,6 @@ param.rho1D = 1/param.gamma0*(1/8*param.I/IA*param.K.^2/param.sigmax^2/param.ku^
 param.gammar = sqrt( param.k*(1 + param.K.^2)/(2*param.ku) ); % Resonant energy
 param.omegap = sqrt( (4*pi*param.rho1D*e0.^2)/(4*(param.gammar.^2)*param.omega0) ); % Plasma frequency
 param.rho = ((param.K*param.gamma0*param.omegap)/(4*param.gammar.^2*param.omega0)).^(2/3); % FEL parameter
-param.sigmarho = (4*param.rho.^2)*(1+param.K.^2)/param.K.^2; % Sigma parameter
+param.sigma = (4*param.rho.^2)*(1+param.K.^2)/param.K.^2; % Sigma parameter
 param.delta = (param.gamma0.^2 - param.gammar.^2)/(2*(param.gammar.^2)*param.rho); % Delta parameter
+param.lambda = findRoots(param.rho,param.sigma,param.delta); % Exponential gain length
