@@ -454,15 +454,16 @@ def peravePostprocessing(radfield,power,gammap,thetap,profile_l,profile_b): # Po
     fig.suptitle('Simulation Output')
 
     avgPower = np.mean(power,axis=1) # Compute average power
-    slope,intercept,maxIdx,minIdx = fitExp(np.log10(avgPower),zpos) # Linear fit to power in exponential regime
-    fit = pow(10,zpos*slope+intercept) # Compute fit
+    slope,intercept,maxIdx,minIdx = fitExp(np.log(avgPower),zpos) # Linear fit to power in exponential regime
+    gainlen = 1/slope # Numerical gain length
+    fit = np.exp(zpos*slope+intercept) # Compute fit
     lmbda = findRoots() # Compute theoretical gain length
-    err = abs(slope - lmbda)/lmbda # Normalized error of numerical gain length
-    print(f'Theoretical Gain Length: {lmbda}\nNumerically Computed Gain Length: {slope}\nNormalized Error: {err}\n')
+    err = abs(gainlen - params.Lgain)/params.Lgain # Normalized error of numerical gain length
+    print(f'Theoretical Gain Length: {params.Lgain}\nNumerically Computed Gain Length: {gainlen}\nNormalized Error: {err}\n')
 
     ax[0].plot(zpos,avgPower,color='b',label='Avg')
     ax[0].plot(zpos,np.max(power,axis=1),color='r',label='Max')
-    ax[0].plot(zpos,fit,color='g',linestyle='dashed',label=f'Average Fit, slope = {round(slope,3)}')
+    ax[0].plot(zpos,fit,color='g',linestyle='dashed',label=f'Average Fit, Gain Length = {round(gainlen,3)}')
     ax[0].vlines([zpos[minIdx],zpos[maxIdx]],np.min(fit)*(.01),np.max(fit)*(100),linestyles='dashed',color='black',label='Fiting Region')
     ax[0].set_xlim([0,zpos[-1]])
     ax[0].set_ylim([np.min(fit)*0.75,np.max(fit)*1.25])

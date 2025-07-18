@@ -122,6 +122,7 @@ else:
 
 omega0 = c*ku # Undulator frequency
 rho1D = (1/gamma0)*pow( (1/8)*(I/IA)*(pow(K,2)/(pow(sigmax*ku,2))),(1/3)) # Electron density
+Lgain = lambdau/(4*np.sqrt(3)*np.pi*rho1D) # Gain length
 gammar = np.sqrt( k*(1 + pow(K,2))/(2*ku) ) # Resonant energy
 omegap = np.sqrt( 4*np.pi*rho1D*pow(e0,2)/(4*pow(gammar,2)*omega0) ) # Plasma frequency
 rho = pow((K*gamma0*omegap)/(4*pow(gammar,2)*omega0),2/3) # FEL parameter

@@ -51,14 +51,14 @@ param.bunch = 0.000001;                                  % Initial bunching fact
 param.bunchphase = -param.psir-pi/2;                     % Initial bunching phase
 param.buncherAmp = 5;
 
-betax=5.1; % Average beta function, 4.7544975 (something weird going on here)
-emitx=1e-6; % normalized emittance in m*rad
-charge = 2255.965e-12; % Computed from peak current and sigma_t
+betax = 5.1; % Average beta function, 4.7544975 (something weird going on here)
+emitx = 1e-6; % normalized emittance in m*rad
+charge = 2*2255.965e-12; % Computed from peak current and sigma_t
 %param.sigma_t = 40e-15;
 if (param.beamdistribution == 1)
-    param.I = charge/sqrt(2*pi)/param.sigma_t     % beam current 
+    param.I = charge/sqrt(2*pi)/param.sigma_t;     % beam current 
 else
-    param.I = charge/2/param.sigma_t              % beam current 
+    param.I = charge/2/param.sigma_t;              % beam current 
 end
 
 param.sigmax = sqrt(betax*emitx/gamma0);            % beam radius
@@ -76,15 +76,15 @@ param.sigma_l = 2400e-15;
 
 %% Simplifying constants
 param.chi2 = e0/me/c^2;
-param.chi1=mu0*c/2*param.I/param.A_e;
+param.chi1 = mu0*c/2*param.I/param.A_e;
 
 %% Parameters for exponential gain regime
 
 param.omega0 = param.ku*c;
-param.rho1D = 1/param.gamma0*(1/8*param.I/IA*param.K.^2/param.sigmax^2/param.ku^2)^(1/3);
+param.rho1D = 1/param.gamma0*(1/8*param.I/IA*param.K.^2/param.sigmax^2/param.ku^2)^(1/3); % 1D FEL parameter
+param.Lgain = param.lambdau/(4*sqrt(3)*pi*param.rho1D); % Gain length
 param.gammar = sqrt( param.k*(1 + param.K.^2)/(2*param.ku) ); % Resonant energy
-param.omegap = sqrt( (4*pi*param.rho1D*e0.^2)/(4*(param.gammar.^2)*param.omega0) ); % Plasma frequency
-param.rho = ((param.K*param.gamma0*param.omegap)/(4*param.gammar.^2*param.omega0)).^(2/3); % FEL parameter
-param.sigma = (4*param.rho.^2)*(1+param.K.^2)/param.K.^2; % Sigma parameter
-param.delta = (param.gamma0.^2 - param.gammar.^2)/(2*(param.gammar.^2)*param.rho); % Delta parameter
-param.lambda = findRoots(param.rho,param.sigma,param.delta); % Exponential gain length
+param.sigma = (4*param.rho1D.^2)*(1+param.K.^2)/param.K.^2; % Sigma parameter
+param.delta = (param.gamma0.^2 - param.gammar.^2)/(2*(param.gammar.^2)*param.rho1D); % Delta parameter
+param.lambda = findRoots(param.rho1D,param.sigma,param.delta); % Exponential gain factor, used to compute gain length
+param.gain_lambda = param.lambdau/(param.lambda*4*pi*param.rho1D);

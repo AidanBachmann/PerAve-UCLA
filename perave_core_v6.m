@@ -94,7 +94,7 @@ for ij = 1:param.Nsnap-1  % takes Nsnap snapshots along length of undulator
      gammaf = squeeze(gammap(ij,islice,:));
      thetaf = squeeze(thetap(ij,islice,:));
      E_q0 = radfield(ij,islice);
-     param.chi1=mu0*c/2*param.I*profile_b(islice)/param.A_e;
+     param.chi1 = mu0*c/2*param.I*profile_b(islice)/param.A_e;
 % RK4th order integration     
      phasespaceold = [thetaf,gammaf];
      evaluesold = E_q0;
