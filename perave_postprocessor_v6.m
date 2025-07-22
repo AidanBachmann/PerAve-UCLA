@@ -35,9 +35,6 @@ set(gca,'FontSize',16)
 end
 
 %% Radiation Power and spectrum at exit
-figure(2)
-title('Simulation Output')
-subplot(2,3,1)
 avgPower = mean(power,2); % Compute average power
 idx = find(avgPower==max(avgPower)); % Find index where power is maximal
 idxPad = round(param.Nsnap*0.125); % Curve is not linear near max, use to truncate data for fit before max
@@ -45,18 +42,23 @@ upperIdx = idx - idxPad; % Compute upper index for fit
 lowerIdx = round(idxPad*2); % Compute lower index for fit
 coeff = polyfit(zpos(lowerIdx:upperIdx),log(avgPower(lowerIdx:upperIdx)),1); % Compute coefficients for linear fit
 gainlen = 1/coeff(1);
+param.gainlen = gainlen; % Store numerical gain length
 powerFit = exp(polyval(coeff,zpos)); % Compute fit
-% Plots
-semilogy(zpos,avgPower,'b');
-hold on
-semilogy(zpos,powerFit,color='g',LineStyle='--'); % Plot fit
-semilogy(zpos,max(power'),color='r');
-xline([zpos(lowerIdx) zpos(upperIdx)],'--',color='black');
-xlim([0,zpos(end)]);
-title('Radiation Power along the beam');
-legend('Avg',strcat('Fit, Gain Length =  ',num2str(gainlen)),'Max','Fitting Region');
-fprintf('\nTheoretical Gain Length: %f\nNumerically Computed Gain Length: %f\nNormalized Error: %f\n',param.Lgain,gainlen,abs(gainlen - param.Lgain)/param.Lgain);
-
+if param.suppress_plots == 0
+    figure(2)
+    title('Simulation Output')
+    subplot(2,3,1)
+    % Plots
+    semilogy(zpos,avgPower,'b');
+    hold on
+    semilogy(zpos,powerFit,color='g',LineStyle='--'); % Plot fit
+    semilogy(zpos,max(power'),color='r');
+    xline([zpos(lowerIdx) zpos(upperIdx)],'--',color='black');
+    xlim([0,zpos(end)]);
+    title('Radiation Power along the beam');
+    legend('Avg',strcat('Fit, Gain Length =  ',num2str(gainlen)),'Max','Fitting Region');
+    fprintf('\nTheoretical Gain Length: %f\nNumerically Computed Gain Length: %f\nNormalized Error: %f\n',param.Lgain,gainlen,abs(gainlen - param.Lgain)/param.Lgain);
+end
 if param.itdp
 subplot(2,3,2)
 plot([1:1:size(power,2)]*param.zsep*param.lambda0*1e15/3e8,power(end,:))
@@ -104,12 +106,13 @@ meanenergy(ij)=sum(mean(gammap(ij,:,:),3).*profile_b)/sum(profile_b);
 end
 
 % 
-subplot(2,3,6)
-plot([1:1:param.Nsnap]*param.stepsize,meanenergy)
-xlabel('z')
-ylabel('\gamma')
-xlim([0,param.Nsnap*param.stepsize])
-
+if param.suppress_plots == 0
+    subplot(2,3,6)
+    plot([1:1:param.Nsnap]*param.stepsize,meanenergy)
+    xlabel('z')
+    ylabel('\gamma')
+    xlim([0,param.Nsnap*param.stepsize])
+end
 
 if param.itdp
 end
@@ -140,26 +143,24 @@ Econservation = ((meanenergy(end)-meanenergy(1))*param.I*sum(profile_b)*param.la
 if param.phasespacemovie
     filename='particle_movie.gif';
     figure(10)
-    set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]); 
-
-for i=1:param.Nsnap    
-
-fieldphase(i)=mean(angle(radfield(i,:)));
-
-tp=squeeze(thetap(i,:,:))+fieldphase(i)+pi/2;% You can add the phase of the field if you want
-gp=squeeze(gammap(i,:,:));    
-
-tresh=reshape(tp,[1,size(tp,1)*size(tp,2)]);
-gresh=reshape(gp,[1,size(gp,1)*size(gp,2)]);
-
-if param.itdp
-    plot((mod(tresh,2*pi)-pi)./pi,(gresh./(meanenergy(1))-1),'*k','MarkerSize',1)
-else     
-   plot((mod(tp+2*pi,2*pi)-pi)./pi,(gp./(meanenergy(1))-1),'.k','MarkerSize',3)
-end
-set(gca,'FontSize',20)
-xlabel('\Psi/pi');ylabel('\Delta \gamma/\gamma_0');
-pause(0.1)
-end
+    set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
+    for i=1:param.Nsnap
+        fieldphase(i)=mean(angle(radfield(i,:)));
+        
+        tp=squeeze(thetap(i,:,:))+fieldphase(i)+pi/2;% You can add the phase of the field if you want
+        gp=squeeze(gammap(i,:,:));    
+        
+        tresh=reshape(tp,[1,size(tp,1)*size(tp,2)]);
+        gresh=reshape(gp,[1,size(gp,1)*size(gp,2)]);
+        
+        if param.itdp
+            plot((mod(tresh,2*pi)-pi)./pi,(gresh./(meanenergy(1))-1),'*k','MarkerSize',1)
+        else     
+           plot((mod(tp+2*pi,2*pi)-pi)./pi,(gp./(meanenergy(1))-1),'.k','MarkerSize',3)
+        end
+        set(gca,'FontSize',20)
+        xlabel('\Psi/pi');ylabel('\Delta \gamma/\gamma_0');
+        pause(0.1)
+    end
 end
     

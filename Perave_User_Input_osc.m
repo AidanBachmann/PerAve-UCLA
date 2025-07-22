@@ -17,7 +17,8 @@ param.z0 = 0;
 param.psir = pi/6;
 
 %% Simulation control options
-param.phasespacemovie=0;
+param.suppress_plots = 1; % Suppress plotting in perave_postprocessor_v6 (1 for True, 0 for False)
+param.phasespacemovie = 0;
 param.itdp = 0; % 1 for time-dependent simulation, 0 for time independent
 param.prebunching = 1;                                                                  % set to 1 to start from a pre-bunched beam. 
 param.changeresphase = 0;
@@ -54,7 +55,7 @@ param.buncherAmp = 5;
 
 betax = 5.1; % Average beta function, 4.7544975 (something weird going on here)
 emitx = 1e-6; % normalized emittance in m*rad
-charge = 2*2255.965e-12; % Computed from peak current and sigma_t
+charge = param.charge; % Computed from peak current and sigma_t
 %param.sigma_t = 40e-15;
 if (param.beamdistribution == 1)
     param.I = charge/sqrt(2*pi)/param.sigma_t;     % beam current 
