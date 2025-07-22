@@ -9,7 +9,8 @@ rng(3141592653)
 param.lambdau = 3.14e-2;                                 % undulator period (m)
 param.K = 1.934; %e0*Bfield*/me/c/ku;               % RMS undulator parameter
 param.ku = 2.*pi./param.lambdau;                   % undulator wavenumber
-lwig=9.42;                                                             % Undulator length (m), paper defines number of undulator periods and lambdau, so lwig is computed from these vals    
+lwig = 9.42;                                                             % Undulator length (m), paper defines number of undulator periods and lambdau, so lwig is computed from these vals 
+param.undulator_type = 0; % Type of undulator (0 for planar, 1 for helical)
 % Tapering options
 param.tapering = 0;                                         % tapering (-1 acceleration ; 0 no tapering ; 1 decelation)    
 param.z0 = 0;
@@ -77,6 +78,7 @@ param.sigma_l = 2400e-15;
 %% Simplifying constants
 param.chi2 = e0/me/c^2;
 param.chi1 = mu0*c/2*param.I/param.A_e;
+param.chi = (param.K.^2)/(2*(1 + param.K.^2)); % Argument of the JJ factort that appears in the coupling factor (this changes with tapering)
 
 %% Parameters for exponential gain regime
 
