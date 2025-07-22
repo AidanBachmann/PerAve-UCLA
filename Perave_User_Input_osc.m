@@ -10,7 +10,7 @@ param.lambdau = 3.14e-2;                                 % undulator period (m)
 param.K = 1.934; %e0*Bfield*/me/c/ku;               % RMS undulator parameter
 param.ku = 2.*pi./param.lambdau;                   % undulator wavenumber
 lwig = 9.42;                                                             % Undulator length (m), paper defines number of undulator periods and lambdau, so lwig is computed from these vals 
-param.undulator_type = 1; % Type of undulator (0 for planar, 1 for helical)
+param.undulator_type = 0; % Type of undulator (0 for planar, 1 for helical)
 % Tapering options
 param.tapering = 0;                                         % tapering (-1 acceleration ; 0 no tapering ; 1 decelation)    
 param.z0 = 0;
@@ -68,7 +68,7 @@ param.A_e = 2*pi*param.sigmax^2;                          % beam cross section
 Simulation_temporal_window=param.nslices*param.zsep*param.lambda0/c;
 
 %% radiation parameters
-P0 = 1e3; param.P0=P0;                                               % Peak input power (W) 
+P0 = 1e1; param.P0=P0;                                               % Peak input power (W) 
 A_mode = param.A_e;                                                     % 1D code. area is same for e_beam and radiation
 param.waist = sqrt(A_mode*2/pi);
 zr = pi*param.waist^2/param.lambda0;                          % Rayleigh length of seed (m)

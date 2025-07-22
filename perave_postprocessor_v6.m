@@ -36,10 +36,15 @@ end
 
 %% Radiation Power and spectrum at exit
 avgPower = mean(power,2); % Compute average power
-idx = find(avgPower==max(avgPower)); % Find index where power is maximal
+pks = findpeaks(avgPower);
+if isempty(pks) == true
+    idx = find(avgPower==max(avgPower));
+else
+    idx = find(avgPower==pks(1)); % Find index where power is maximal
+end
 idxPad = round(param.Nsnap*0.125); % Curve is not linear near max, use to truncate data for fit before max
 upperIdx = idx - idxPad; % Compute upper index for fit
-lowerIdx = round(idxPad*2); % Compute lower index for fit
+lowerIdx = round(idxPad*1.5); % Compute lower index for fit
 coeff = polyfit(zpos(lowerIdx:upperIdx),log(avgPower(lowerIdx:upperIdx)),1); % Compute coefficients for linear fit
 gainlen = 1/coeff(1);
 param.gainlen = gainlen; % Store numerical gain length
@@ -53,7 +58,7 @@ if param.suppress_plots == 0
     hold on
     semilogy(zpos,powerFit,color='g',LineStyle='--'); % Plot fit
     semilogy(zpos,max(power'),color='r');
-    xline([zpos(lowerIdx) zpos(upperIdx)],'--',color='black');
+    xline([zpos(lowerIdx) zpos(upperIdx)],'--',color='r');
     xlim([0,zpos(end)]);
     title('Radiation Power along the beam');
     legend('Avg',strcat('Fit, Gain Length =  ',num2str(gainlen)),'Max','Fitting Region');
