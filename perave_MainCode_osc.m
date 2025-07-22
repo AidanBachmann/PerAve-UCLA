@@ -29,16 +29,12 @@ Perave_User_Input_osc;
 compute_undulator_field_v5h;
 
 %% Calculate 1-D FEL parameters
-rho1D = 1/param.gamma0*(1/8*param.I/IA*param.K.^2/param.sigmax^2/param.ku^2)^(1/3);
-Lgain = param.lambdau/(4*sqrt(3)*pi*rho1D);
-Lsat =   param.lambdau/rho1D;
-Psat = 1.6*rho1D*param.Ee*param.I;
 if param.tapering
     [psi1, psi2, bucket_height, capture_fraction, bucket_area, bunching_factor] = bucket_parameters(param.psir);
     a1 = 2*param.lambda0/param.lambdau*e0*param.E0/me/c^2*sin(param.psir);
     a2 = ((2*param.lambda0/param.lambdau)^1.5)*Z0*e0*param.I*sin(param.psir)^2*capture_fraction*bunching_factor/2/param.A_e/me/c^2;
     pmax_prediction=P0+param.K*(a1*lwig+a2*lwig^2/2)/(1+param.K^2)*param.Ee*param.I*capture_fraction;
-    etamax = param.K*(a1*lwig+a2*lwig^2/2)/(1+param.K^2)*capture_fraction
+    etamax = param.K*(a1*lwig+a2*lwig^2/2)/(1+param.K^2)*capture_fraction;
     bunchlength_rms = param.sigma_t;
     peakcurrent = param.I;
 end

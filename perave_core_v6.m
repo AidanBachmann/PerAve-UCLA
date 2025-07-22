@@ -165,7 +165,7 @@ else
             Kz(ij+1)=Kz(ij)-param.stepsize/const_resp*abs(radfield(ij,:)).*sin(res_phase(ij));
             gammares(ij+1) = sqrt (param.lambdau.*(1+Kz(ij).^2) / 2/param.lambda0);
             bunch(ij)=(mean(exp(1j.*thetap(ij,1,:)),3));
-            param.chi = (param.Kz(ij+1).^2)/(2*(1 + param.Kz(ij+1).^2)); % Update chi parameter
+            param.chi = (Kz(ij+1).^2)/(2*(1 + Kz(ij+1).^2)); % Update chi parameter
       % Particle detrap when deltagamma decreases
             if (ij>40000 & param.changeresphase)
                 bukh = @(phi) sqrt(cos(phi)-(pi/2-phi)*sin(phi));
