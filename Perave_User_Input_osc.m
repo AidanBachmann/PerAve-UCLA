@@ -12,7 +12,13 @@ param.ku = 2.*pi./param.lambdau;                   % undulator wavenumber
 lwig = 9.42;                                                             % Undulator length (m), paper defines number of undulator periods and lambdau, so lwig is computed from these vals 
 param.undulator_type = 0; % Type of undulator (0 for planar, 1 for helical)
 % Tapering options
-param.tapering = 0;                                         % tapering (-1 acceleration ; 0 no tapering ; 1 decelation)    
+param.tapering = 0;                                         % tapering (-1 acceleration ; 0 no tapering ; 1 deceleration, tapering computed at every step ; 2 deceleration, quadratic tapering)
+if param.tapering == 2
+    param.a0 = 1; % Initial guesses for quadratic tapering of the form K(z) = K0(1 + a0(z - z0) + b0(z - z0)^2)
+    param.b0 = 1; % In this mode, we can optimize a0, b0, and z0 to maximize power output
+    param.z0 = 1;
+    param.h = 1; % Step size
+end
 param.z0 = 0;
 param.psir = pi/6;
 
@@ -94,6 +100,6 @@ param.Lsat =   param.lambdau/param.rho1D; % Saturation length
 param.Psat = 1.6*param.rho1D*param.Ee*param.I; % Saturation power
 param.gammar = sqrt( param.k*(1 + param.K.^2)/(2*param.ku) ); % Resonant energy
 param.sigma = (4*param.rho1D.^2)*(1+param.K.^2)/param.K.^2; % Sigma parameter
-param.delta = (param.gamma0.^2 - param.gammar.^2)/(2*(param.gammar.^2)*param.rho1D); % Delta parameter
+param.delta = (param.gamma0.^2 - param.gammar.^2)/(2*(param.gammar.^2)*param.rho1D); % Detuning
 param.lambda = findRoots(param.rho1D,param.sigma,param.delta); % Exponential gain factor, used to compute gain length
 param.gain_lambda = param.lambdau/(param.lambda*4*pi*param.rho1D);

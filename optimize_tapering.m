@@ -1,6 +1,4 @@
-%% PBPL PERiod AVErage 1D FEL simulation code %%
-%%% Input deck intended to be compatible with WafFEL, 1D period average, and GENESIS %%%
-%% P. Musumeci oscillator version %%
+%% Optimize coefficients a, b, and z0 for quadratic tapering to maximize power output.
 clear all
 close all
 
@@ -130,7 +128,6 @@ plot(PL)
 title 'pulselength'
 figure(103)
 plot(Eff)
-hold off
 
 figure(300)
 try
@@ -138,8 +135,3 @@ try
 catch
     disp('Error using contourf, argument must be at least 2x2.')
 end
-gamma_avg = transpose(mean(gammap,3)); % Average gamma along undulator
-detune = (gamma_avg.^2 - gammares)./(2*(gammares.^2)*param.rho1D); % Detuning along undulator
-figure(5);
-plot([1:1:param.Nsnap]*param.stepsize,detune);
-title('Detuning Along Undulator');

@@ -186,4 +186,4 @@ figure(28);
 plot(currArr./1000,detuneArr,color='g'); % Detuning as a function of current
 xlabel('Current (kA)');
 ylabel('Detuning Parameter at End of Undulator');
-title('Final Detuning as a Function of Current');
+titel('Final Detuning as a Function of Current')

@@ -52,7 +52,7 @@ powerFit = exp(polyval(coeff,zpos)); % Compute fit
 if param.suppress_plots == 0
     figure(2)
     title('Simulation Output')
-    subplot(2,3,1)
+    subplot(2,2,1)
     % Plots
     semilogy(zpos,avgPower,'b');
     hold on
@@ -65,7 +65,7 @@ if param.suppress_plots == 0
     fprintf('\nTheoretical Gain Length: %f\nNumerically Computed Gain Length: %f\nNormalized Error: %f\n',param.Lgain,gainlen,abs(gainlen - param.Lgain)/param.Lgain);
 end
 if param.itdp
-subplot(2,3,2)
+subplot(2,2,2)
 plot([1:1:size(power,2)]*param.zsep*param.lambda0*1e15/3e8,power(end,:))
 hold on
 plot([1:1:size(power,2)]*param.zsep*param.lambda0*1e15/3e8,max(power(end,:))*profile_l(:),'-')
@@ -76,7 +76,7 @@ ylabel('Power [W]')
 legend('Final',sprintf(['Norm Initial ',num2str(P0/1e9),' GW']), sprintf(['Current profile ',num2str(param.I/1e3,3),' kA']),'Location','southeast')
 
 [powerspec,omega]=spectrum_calc(radfield(end,:),param.lambda0,param.zsep);
-subplot(2,3,3)
+subplot(2,2,3)
 semilogy((omega+1)*hbar*2*pi*c/param.lambda0,powerspec,'b');    
 xlim([omega(1)+1,omega(end)+1]*hbar*2*pi*c/param.lambda0)    
     xlabel('Photon Energy [eV]')
@@ -112,7 +112,7 @@ end
 
 % 
 if param.suppress_plots == 0
-    subplot(2,3,6)
+    subplot(2,2,4)
     plot([1:1:param.Nsnap]*param.stepsize,meanenergy)
     xlabel('z')
     ylabel('\gamma')
