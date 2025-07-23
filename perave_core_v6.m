@@ -146,6 +146,7 @@ for ij = 1:param.Nsnap-1  % takes Nsnap snapshots along length of undulator
     fprintf(formatSpec, telapsed, res_step*(ij-1), res_step*ij, param.und_periods*param.lambdau);
 end
 else
+    zpos = [1:param.Nsnap]*param.stepsize;
     %% Time independent
     deltagammamax(1) = 1;
     for ij = 1:param.Nsnap-1  % takes Nsnap snapshots along length of undulator
@@ -161,8 +162,9 @@ else
      gammap(ij+1,1,:) = phasespacenew(:,2);
      radfield(ij+1,1) = evaluesnew;          
     
-     % Compute undulator field at next step (constant res phase)     
-            Kz(ij+1)=Kz(ij)-param.stepsize/const_resp*abs(radfield(ij,:)).*sin(res_phase(ij));
+     % Compute undulator field at next step (constant res phase)
+            %Kz(ij+1) = Kz(ij)-param.stepsize/const_resp*abs(radfield(ij,:)).*sin(res_phase(ij));
+            Kz(ij+1) = param.K*(1 + (param.a0*(zpos(ij) - param.z0) + param.b0*(zpos(ij) - param.z0).^2)*res_phase(ij)); % Quadratic tapering
             gammares(ij+1) = sqrt (param.lambdau.*(1+Kz(ij).^2) / 2/param.lambda0);
             bunch(ij)=(mean(exp(1j.*thetap(ij,1,:)),3));
             param.chi = (Kz(ij+1).^2)/(2*(1 + Kz(ij+1).^2)); % Update chi parameter

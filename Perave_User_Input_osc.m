@@ -12,18 +12,12 @@ param.ku = 2.*pi./param.lambdau;                   % undulator wavenumber
 lwig = 9.42;                                                             % Undulator length (m), paper defines number of undulator periods and lambdau, so lwig is computed from these vals 
 param.undulator_type = 0; % Type of undulator (0 for planar, 1 for helical)
 % Tapering options
-param.tapering = 0;                                         % tapering (-1 acceleration ; 0 no tapering ; 1 deceleration, tapering computed at every step ; 2 deceleration, quadratic tapering)
-if param.tapering == 2
-    param.a0 = 1; % Initial guesses for quadratic tapering of the form K(z) = K0(1 + a0(z - z0) + b0(z - z0)^2)
-    param.b0 = 1; % In this mode, we can optimize a0, b0, and z0 to maximize power output
-    param.z0 = 1;
-    param.h = 1; % Step size
-end
-param.z0 = 0;
+param.tapering = 2;                                         % tapering (-1 acceleration ; 0 no tapering ; 1 deceleration, tapering computed at every step ; 2 deceleration, quadratic tapering)
+%param.z0 = 0;
 param.psir = pi/6;
 
 %% Simulation control options
-param.suppress_plots = 1; % Suppress plotting in perave_postprocessor_v6 (1 for True, 0 for False)
+param.suppress_plots = 0; % Suppress plotting in perave_postprocessor_v6 (1 for True, 0 for False)
 param.phasespacemovie = 0;
 param.itdp = 0; % 1 for time-dependent simulation, 0 for time independent
 param.prebunching = 1;                                                                  % set to 1 to start from a pre-bunched beam. 
@@ -87,6 +81,14 @@ param.chi2 = e0/me/c^2;
 param.chi1 = mu0*c/2*param.I/param.A_e;
 param.chi = (param.K.^2)/(2*(1 + param.K.^2)); % Argument of the JJ factort that appears in the coupling factor (this changes with tapering)
 param.fc = besselj(0,param.chi) - besselj(1,param.chi); % Coupling constant
+
+%% Quadratic tapering options
+if param.tapering == 2
+    param.a0 = -0.1; % Initial guesses for quadratic tapering of the form K(z) = K0(1 + a0(z - z0) + b0(z - z0)^2)
+    param.b0 = -0.05; % In this mode, we can optimize a0, b0, and z0 to maximize power output
+    param.z0 = 0.9*param.Nsnap*param.stepsize;
+    param.h = 1; % Step size
+end
 
 %% 1D FEL parameters
 param.omega0 = param.ku*c;
