@@ -1,4 +1,4 @@
-function [pmax] = sim(a0,b0,zs)
+function [pmax] = sim(x0)
     global c mu0 e0 me eps0 IA Z0
     
     c = 2.99792458.*10^8;                                            % speed of light
@@ -18,9 +18,9 @@ function [pmax] = sim(a0,b0,zs)
     t1 = tic;
 
     Perave_User_Input_osc;
-    param.a0 = a0; % Set parameters for quadratic tapering
-    param.b0 = b0;
-    param.zs = zs;
+    param.a0 = x0(1); % Set parameters for quadratic tapering
+    param.b0 = x0(2);
+    param.zs = x0(3);
 
     %% Compute the undulator field
     [Kz,res_phase] = compute_undulator_field_v5h(param);
@@ -119,5 +119,6 @@ function [pmax] = sim(a0,b0,zs)
         plot([1:1:param.Nsnap]*param.stepsize,detune);
         title('Detuning Along Undulator');
     end
-    pmax = max(avgPower);
+    pmax = -1*max(avgPower);
+    pmax
 end

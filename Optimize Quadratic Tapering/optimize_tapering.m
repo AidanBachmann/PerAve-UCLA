@@ -24,4 +24,8 @@ recirculate = 0;
 t1 = tic;
 Perave_User_Input_osc;
 
-pmax = sim(param.a0,param.b0,param.zs);
+x0 = [param.a0,param.b0,param.zs]; % Initial guessses for optimal tapering parameters
+res = fminsearch(@sim,x0); % Optimize parameters
+disp('Optimal parameters for quadratic tapering:');
+disp(res);
+%pmax = sim(param.a0,param.b0,param.zs);

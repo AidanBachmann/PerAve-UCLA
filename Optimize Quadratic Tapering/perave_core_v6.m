@@ -164,8 +164,8 @@ function [power,radfield,gammap,thetap,profile_l,profile_b,bunch,gammares] = per
          radfield(ij+1,1) = evaluesnew;          
         
          % Compute undulator field at next step (constant res phase)
-                Kz(ij+1) = Kz(ij)-param.stepsize/const_resp*abs(radfield(ij,:)).*sin(res_phase(ij));
-                %Kz(ij+1) = param.K*(1 + (param.a0*(zpos(ij) - param.zs) + param.b0*(zpos(ij) - param.zs).^2)*res_phase(ij)); % Quadratic tapering
+                %Kz(ij+1) = Kz(ij)-param.stepsize/const_resp*abs(radfield(ij,:)).*sin(res_phase(ij));
+                Kz(ij+1) = param.K*(1 + (param.a0*(zpos(ij) - param.zs) + param.b0*(zpos(ij) - param.zs).^2)*res_phase(ij)); % Quadratic tapering
                 gammares(ij+1) = sqrt (param.lambdau.*(1+Kz(ij).^2) / 2/param.lambda0);
                 bunch(ij)=(mean(exp(1j.*thetap(ij,1,:)),3));
                 param.chi = (Kz(ij+1).^2)/(2*(1 + Kz(ij+1).^2)); % Update chi parameter
