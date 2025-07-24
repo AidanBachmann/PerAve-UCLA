@@ -12,12 +12,12 @@ param.ku = 2.*pi./param.lambdau;                   % undulator wavenumber
 lwig = 9.42;                                                             % Undulator length (m), paper defines number of undulator periods and lambdau, so lwig is computed from these vals 
 param.undulator_type = 0; % Type of undulator (0 for planar, 1 for helical)
 % Tapering options
-param.tapering = 1;                                         % tapering (-1 acceleration ; 0 no tapering ; 1 deceleration, tapering computed at every step ; 2 deceleration, quadratic tapering)
+param.tapering = 2;                                         % tapering (-1 acceleration ; 0 no tapering ; 1 deceleration, tapering computed at every step ; 2 deceleration, quadratic tapering)
 param.z0 = 0;
 param.psir = pi/6;
 
 %% Simulation control options
-param.suppress_plots = 0; % Suppress plotting in perave_postprocessor_v6 (1 for True, 0 for False)
+param.suppress_plots = 1; % Suppress plotting in perave_postprocessor_v6 (1 for True, 0 for False)
 param.phasespacemovie = 0;
 param.itdp = 0; % 1 for time-dependent simulation, 0 for time independent
 param.prebunching = 1;                                                                  % set to 1 to start from a pre-bunched beam. 
