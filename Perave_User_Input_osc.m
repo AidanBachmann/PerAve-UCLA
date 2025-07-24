@@ -12,8 +12,8 @@ param.ku = 2.*pi./param.lambdau;                   % undulator wavenumber
 lwig = 9.42;                                                             % Undulator length (m), paper defines number of undulator periods and lambdau, so lwig is computed from these vals 
 param.undulator_type = 0; % Type of undulator (0 for planar, 1 for helical)
 % Tapering options
-param.tapering = 2;                                         % tapering (-1 acceleration ; 0 no tapering ; 1 deceleration, tapering computed at every step ; 2 deceleration, quadratic tapering)
-%param.z0 = 0;
+param.tapering = 1;                                         % tapering (-1 acceleration ; 0 no tapering ; 1 deceleration, tapering computed at every step ; 2 deceleration, quadratic tapering)
+param.z0 = 0;
 param.psir = pi/6;
 
 %% Simulation control options
@@ -82,14 +82,6 @@ param.chi1 = mu0*c/2*param.I/param.A_e;
 param.chi = (param.K.^2)/(2*(1 + param.K.^2)); % Argument of the JJ factort that appears in the coupling factor (this changes with tapering)
 param.fc = besselj(0,param.chi) - besselj(1,param.chi); % Coupling constant
 
-%% Quadratic tapering options
-if param.tapering == 2
-    param.a0 = -0.1; % Initial guesses for quadratic tapering of the form K(z) = K0(1 + a0(z - z0) + b0(z - z0)^2)
-    param.b0 = -0.05; % In this mode, we can optimize a0, b0, and z0 to maximize power output
-    param.z0 = 0.9*param.Nsnap*param.stepsize;
-    param.h = 1; % Step size
-end
-
 %% 1D FEL parameters
 param.omega0 = param.ku*c;
 if param.undulator_type == 0
@@ -105,3 +97,11 @@ param.sigma = (4*param.rho1D.^2)*(1+param.K.^2)/param.K.^2; % Sigma parameter
 param.delta = (param.gamma0.^2 - param.gammar.^2)/(2*(param.gammar.^2)*param.rho1D); % Detuning
 param.lambda = findRoots(param.rho1D,param.sigma,param.delta); % Exponential gain factor, used to compute gain length
 param.gain_lambda = param.lambdau/(param.lambda*4*pi*param.rho1D);
+
+%% Quadratic tapering options
+if param.tapering == 2
+    param.a0 = -0.1; % Initial guesses for quadratic tapering of the form K(z) = K0(1 + a0(z - z0) + b0(z - z0)^2)
+    param.b0 = -0.05; % In this mode, we can optimize a0, b0, and z0 to maximize power output
+    param.zs = param.Lgain*log(param.Psat/P0); % Length at which to start tapering
+    param.h = 1; % Step size
+end

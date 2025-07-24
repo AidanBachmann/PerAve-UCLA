@@ -9,7 +9,7 @@ elseif param.tapering == 2
     zpos = [1:param.Nsnap]*param.stepsize;
     res_phase = zeros(1,param.Nsnap);
     for ij = 1:param.Nsnap
-        if zpos(ij) > param.z0 % Suppress tapering for z < z0
+        if zpos(ij) > param.zs % Suppress tapering for z < zs
             res_phase(ij) = 1;
         end
     end
