@@ -22,9 +22,9 @@ param.phasespacemovie = 0;
 param.itdp = 0; % 1 for time-dependent simulation, 0 for time independent
 param.prebunching = 1;                                                                  % set to 1 to start from a pre-bunched beam. 
 param.changeresphase = 0;
-saveoutput=0;
+saveoutput = 0;
 % Set simulation length and # of snapshots
-param.delz=1;
+param.delz = 1;
 param.und_periods = round(lwig/param.lambdau);                         % number of undulator periods to simulate
 param.Nsnap = round(lwig/param.lambdau/param.delz);                % number of snapshots to take over the length of the undulator
 param.zsep = 5;                                                              
@@ -68,7 +68,7 @@ param.A_e = 2*pi*param.sigmax^2;                          % beam cross section
 Simulation_temporal_window=param.nslices*param.zsep*param.lambda0/c;
 
 %% radiation parameters
-P0 = 1e1; param.P0=P0;                                               % Peak input power (W) 
+P0 = 30e9; param.P0=P0;                                               % Peak input power (W) 
 A_mode = param.A_e;                                                     % 1D code. area is same for e_beam and radiation
 param.waist = sqrt(A_mode*2/pi);
 zr = pi*param.waist^2/param.lambda0;                          % Rayleigh length of seed (m)
@@ -100,7 +100,16 @@ param.gain_lambda = param.lambdau/(param.lambda*4*pi*param.rho1D);
 
 %% Quadratic tapering options
 if param.tapering == 2
-    param.a0 = -0.1; % Initial guesses for quadratic tapering of the form K(z) = K0(1 + a0(z - z0) + b0(z - z0)^2)
-    param.b0 = -0.05; % In this mode, we can optimize a0, b0, and z0 to maximize power output
-    param.zs = param.Lgain*log(param.Psat/P0); % Length at which to start tapering
+    disp('Using Quadratic Tapering');
+    param.a0 = -0.0094; % Initial guesses for quadratic tapering of the form K(z) = K0(1 + a0(z - z0) + b0(z - z0)^2)
+    param.b0 = -0.0008; % In this mode, we can optimize a0, b0, and z0 to maximize power output
+    if param.P0 < param.Psat
+        param.zs = param.Lgain*log(param.Psat/P0); % Length at which to start tapering
+    else
+        param.zs = -0.0551;
+    end
+elseif param.tapering == 1
+    disp('Using Ideal Tapering');
+elseif param.tapering == 0
+    disp('No Tapering');
 end

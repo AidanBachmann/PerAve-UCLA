@@ -28,4 +28,3 @@ x0 = [param.a0,param.b0,param.zs]; % Initial guessses for optimal tapering param
 res = fminsearch(@sim,x0); % Optimize parameters
 disp('Optimal parameters for quadratic tapering:');
 disp(res);
-%pmax = sim(param.a0,param.b0,param.zs);

@@ -18,7 +18,7 @@ Z0 = 376.73;                                                     % Impedance of 
 %% Load the User Determined initial conditions
 clear power radfield thetap gammap bunch
 param.sigma_t = 0.9e-12;
-param.charge = 5*2255.965e-12; % Charge
+param.charge = 2255.965e-12; % Charge
 param.use3Dcorrection  = 1;
 param.beamdistribution = 1;       % Using GENESIS flag: 2-uniform 1-gaussian
 param.laserdistribution = 1;         % Using GENESIS flag: 2-uniform 1-gaussian
