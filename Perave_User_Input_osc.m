@@ -81,6 +81,8 @@ param.chi2 = e0/me/c^2;
 param.chi1 = mu0*c/2*param.I/param.A_e;
 param.chi = (param.K.^2)/(2*(1 + param.K.^2)); % Argument of the JJ factort that appears in the coupling factor (this changes with tapering)
 param.fc = besselj(0,param.chi) - besselj(1,param.chi); % Coupling constant
+etaMX = 0; % Ming Xie correction factor, set to zero to not use correction
+param.chistar = ((Z0*param.I)/(4*pi*param.sigmax.^2))*(1 / (1 + etaMX));
 
 %% 1D FEL parameters
 param.omega0 = param.ku*c;

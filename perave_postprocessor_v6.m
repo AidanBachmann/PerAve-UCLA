@@ -68,8 +68,29 @@ if param.suppress_plots == 0
         legend('Avg','Max');
     end
     xlim([0,zpos(end)]);
+    xlabel('z');
     title('Radiation Power along the beam');
 end
+
+if param.suppress_plots == 0
+    subplot(2,2,2);
+    hold on
+    plot(zpos,etapT);
+    plot(zpos,etapN);
+    legend('Theoretical','Numerical');
+    xlabel('z');
+    ylabel('Relative Energy Loss');
+    title('Relative Energy Loss Along the Undulator');
+    hold off
+
+    subplot(2,2,3);
+    plot(zpos,abs(bunch));
+    xlim([0,param.Nsnap*param.stepsize]);
+    xlabel('z');
+    ylabel('Bunching Factor');
+    title('Bunching Factor Norm Along the Undulator');
+end
+
 if param.itdp
 subplot(2,2,2)
 plot([1:1:size(power,2)]*param.zsep*param.lambda0*1e15/3e8,power(end,:))

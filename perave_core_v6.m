@@ -26,7 +26,7 @@ end
     
 %profile_b = heaviside(tslice-tslice(end)/2+param.sigma_t).*(1-heaviside(tslice-tslice(end)/2-param.sigma_t));
 
-radfield=ones(param.Nsnap,param.nslices)*param.E0;
+radfield = ones(param.Nsnap,param.nslices)*param.E0;
 radfield(1,:) = profile_l*param.E0;
 
 if ~firstpass
@@ -34,7 +34,9 @@ if ~firstpass
 end
 
 thetap = zeros(param.Nsnap,param.nslices,Np);
-gammap=zeros(param.Nsnap,param.nslices,Np);
+gammap = zeros(param.Nsnap,param.nslices,Np);
+etapT = zeros(param.Nsnap,1); % Array to store theoretical relative energy loss
+etapN = zeros(param.Nsnap,1); % Array to store numerical relative energy loss
 
 for islice = 1:param.nslices
 X0 = hammersley(2,Np);
@@ -160,7 +162,7 @@ else
      [phasespacenew,evaluesnew]=push_FEL_particles_RK4(phasespaceold,evaluesold,param,Kz(ij));       
      thetap(ij+1,1,:) = phasespacenew(:,1);
      gammap(ij+1,1,:) = phasespacenew(:,2);
-     radfield(ij+1,1) = evaluesnew;          
+     radfield(ij+1,1) = evaluesnew;      
     
      % Compute undulator field at next step (constant res phase)
             if param.tapering == 2
@@ -169,7 +171,9 @@ else
                 Kz(ij+1) = Kz(ij)-param.stepsize/const_resp*abs(radfield(ij,:)).*sin(res_phase(ij));
             end
             gammares(ij+1) = sqrt (param.lambdau.*(1+Kz(ij).^2) / 2/param.lambda0);
-            bunch(ij)=(mean(exp(1j.*thetap(ij,1,:)),3));
+            bunch(ij) = (mean(exp(1j.*thetap(ij,1,:)),3));
+            etapT(ij,1) = eta1D(param,imag(bunch(ij)),zpos(ij)); % Theoretical relative energy loss
+            etapN(ij,1) = abs(bunch(ij))*(1/param.gamma0)*abs(param.gamma0 - mean(gammap(ij,1,:),3)); % Numerical relative energy loss
             param.chi = (Kz(ij+1).^2)/(2*(1 + Kz(ij+1).^2)); % Update chi parameter
       % Particle detrap when deltagamma decreases
             if (ij>40000 & param.changeresphase)
@@ -186,6 +190,12 @@ else
             
     end
 end
+
+% Compute bunching and relative energy loss at last time step (this is not
+% done in the loop above)
+bunch(param.Nsnap) = (mean(exp(1j.*thetap(param.Nsnap,1,:)),3));
+etapT(param.Nsnap,1) = eta1D(param,imag(bunch(param.Nsnap)),zpos(param.Nsnap)); % Theoretical relative energy loss
+etapN(param.Nsnap,1) = abs(bunch(param.Nsnap))*(1/param.gamma0)*abs(param.gamma0 - mean(gammap(param.Nsnap,1,:),3)); % Numerical relative energy loss
 
 %% Remove slices within one total slippage length
 if(param.itdp)
