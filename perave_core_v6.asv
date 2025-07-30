@@ -195,7 +195,7 @@ end
 % Compute bunching and relative energy loss at last time step (this is not
 % done in the loop above)
 bunch(param.Nsnap) = (mean(exp(1j.*thetap(param.Nsnap,1,:)),3));
-bf(param.Nsnap) = mean(exp(1j.*thetap(param.Nsnap,1,:))./gammap(param.Nsnap,1,:),3);
+bf(ij) = mean(exp(1j.*thetap(ij,1,:))./gammap(ij,1,:),3)
 etapT(param.Nsnap,1) = eta1D(param,imag(bunch(param.Nsnap)),zpos(param.Nsnap)); % Theoretical relative energy loss
 etapN(param.Nsnap,1) = abs(bunch(param.Nsnap))*(1/param.gamma0)*abs(param.gamma0 - mean(gammap(param.Nsnap,1,:),3)); % Numerical relative energy loss
 

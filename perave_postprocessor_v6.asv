@@ -87,6 +87,7 @@ if param.suppress_plots == 0
     subplot(2,2,3);
     hold on
     plot(zpos,abs(bunch));
+    plot()
     %plot(zpos,abs(bf));
     %legend('Bunching Factor','Energy Weighted Bunching Factor');
     xlim([0,param.Nsnap*param.stepsize]);
