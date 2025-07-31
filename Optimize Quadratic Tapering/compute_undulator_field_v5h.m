@@ -1,0 +1,22 @@
+function [Kz,res_phase] = compute_undulator_field_v5h(param)
+    % Compute_undulator_field
+    % Works with perave_core_v5
+    
+    startindex=max(1,floor(param.z0/param.stepsize));
+    
+    if param.tapering == 0
+        res_phase = zeros(1,param.Nsnap);
+    elseif param.tapering == 2
+        zpos = [1:param.Nsnap]*param.stepsize;
+        res_phase = zeros(1,param.Nsnap);
+        for ij = 1:param.Nsnap
+            if zpos(ij) > param.zs % Suppress tapering for z < zs
+                res_phase(ij) = 1;
+            end
+        end
+    else
+        res_phase(1:startindex) = 0;
+        res_phase(startindex:param.Nsnap) = param.psir;
+    end
+    Kz(1) = param.K;
+end
